@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface AccessConfig {
   canApproveInvoices: boolean;
@@ -57,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (username: string, password: string): Promise<void> => {
     try {
-      const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/login", {
+      const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,15 +72,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const data = await response.json();
       
-      setAuthState({
-        isAuthenticated: true,
-        token: data.token,
-        accessConfig: {
-          canApproveInvoices: data.accessConfig?.canApproveInvoices || false,
-        },
-      });
+      // Check if the login was successful by examining the status
+      if (data.status !== 1) {
+        toast.error("Invalid credentials");
+        throw new Error("Invalid credentials");
+      }
       
-      navigate("/");
+      // Only update state if login was successful
+      if (data.token) {
+        setAuthState({
+          isAuthenticated: true,
+          token: data.token,
+          accessConfig: {
+            canApproveInvoices: data.accessConfig?.canApproveInvoices || false,
+          },
+        });
+        
+        navigate("/");
+      } else {
+        toast.error("Login failed - No token received");
+        throw new Error("No token received");
+      }
     } catch (error) {
       console.error("Login error:", error);
       throw error;
