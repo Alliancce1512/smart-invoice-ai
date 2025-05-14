@@ -2,12 +2,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import Navigation from "./Navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <div className="min-h-screen flex flex-col gradient-background relative">
       {/* Abstract shapes for background */}
@@ -39,6 +43,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </Link>
         </div>
       </header>
+
+      {isAuthenticated && <Navigation />}
 
       <main className="flex-1 container mx-auto p-4 animate-fade-in">
         {children}

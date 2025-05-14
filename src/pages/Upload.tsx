@@ -1,7 +1,7 @@
 
 import React from "react";
 import Layout from "@/components/Layout";
-import FileUploader from "@/components/FileUploader";
+import FileUploaderWrapper from "@/components/FileUploaderWrapper";
 
 const Upload = () => {
   return (
@@ -12,7 +12,7 @@ const Upload = () => {
           Upload your invoice in PDF, JPG, or PNG format to extract information
         </p>
         
-        <FileUploader />
+        <FileUploaderWrapper />
         
         <div className="mt-12 bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">Supported Features</h2>
