@@ -1,5 +1,4 @@
-
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -17,8 +16,19 @@ const FileUploader = () => {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Generate a unique session ID on component mount
+  useEffect(() => {
+    // Generate a random session ID using timestamp and random string
+    const generateSessionId = () => {
+      return `session_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+    };
+    
+    setSessionId(generateSessionId());
+  }, []);
 
   const onDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -73,6 +83,8 @@ const FileUploader = () => {
       // Create FormData to send the file
       const formData = new FormData();
       formData.append('invoice_file', file);
+      // Add the session ID to the form data
+      formData.append('sessionId', sessionId);
       
       // Send POST request to the webhook
       const response = await fetch('https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/upload', {
