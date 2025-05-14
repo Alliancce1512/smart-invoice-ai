@@ -130,7 +130,7 @@ const InvoiceResult = () => {
                 </div>
                 <div>
                   <Label htmlFor="date" className="text-gray-500">Invoice Date</Label>
-                  <div id="date" className="font-medium mt-1">{formatDate(invoiceData.invoiceDate)}</div>
+                  <div id="date" className="font-medium mt-1">{invoiceData.invoiceDate}</div>
                 </div>
                 <div>
                   <Label htmlFor="iban" className="text-gray-500">IBAN</Label>
