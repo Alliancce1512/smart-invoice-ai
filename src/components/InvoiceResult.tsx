@@ -15,6 +15,7 @@ interface InvoiceData {
   iban: string;
   category: string;
   approved: boolean;
+  [key: string]: any; // Allow for additional properties in the API response
 }
 
 const InvoiceResult = () => {
@@ -30,7 +31,7 @@ const InvoiceResult = () => {
       try {
         const parsedData = JSON.parse(storedData);
         setInvoiceData(parsedData);
-        setCategory(parsedData.category);
+        setCategory(parsedData.category || "");
       } catch (error) {
         console.error("Failed to parse invoice data:", error);
         navigate("/");
@@ -54,19 +55,33 @@ const InvoiceResult = () => {
   }
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric"
-    });
+    if (!dateString) return "N/A";
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString; // Return the original string if parsing fails
+    }
   };
 
   const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency
-    }).format(amount);
+    if (amount === undefined || amount === null) return "N/A";
+    
+    try {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: currency || "USD"
+      }).format(amount);
+    } catch (error) {
+      console.error("Error formatting currency:", error);
+      return `${amount} ${currency || ""}`;
+    }
   };
 
   const handleCategoryChange = (value: string) => {
@@ -80,7 +95,10 @@ const InvoiceResult = () => {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-xl font-semibold">Invoice Details</CardTitle>
           <div className="flex items-center space-x-2">
-            <Badge variant={invoiceData.approved ? "default" : "secondary"} className={`${invoiceData.approved ? "bg-green-600" : "bg-amber-500"} text-white`}>
+            <Badge 
+              variant={invoiceData.approved ? "default" : "secondary"} 
+              className={`${invoiceData.approved ? "bg-green-600" : "bg-amber-500"} text-white`}
+            >
               {invoiceData.approved ? "Auto-approved" : "Needs review"}
             </Badge>
             <Button 
@@ -102,7 +120,7 @@ const InvoiceResult = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label htmlFor="vendor" className="text-gray-500">Vendor Name</Label>
-                  <div id="vendor" className="font-medium text-lg mt-1">{invoiceData.vendor}</div>
+                  <div id="vendor" className="font-medium text-lg mt-1">{invoiceData.vendor || "N/A"}</div>
                 </div>
                 <div>
                   <Label htmlFor="amount" className="text-gray-500">Amount</Label>
@@ -116,7 +134,7 @@ const InvoiceResult = () => {
                 </div>
                 <div>
                   <Label htmlFor="iban" className="text-gray-500">IBAN</Label>
-                  <div id="iban" className="font-medium font-mono mt-1 text-sm">{invoiceData.iban}</div>
+                  <div id="iban" className="font-medium font-mono mt-1 text-sm">{invoiceData.iban || "N/A"}</div>
                 </div>
               </div>
 
