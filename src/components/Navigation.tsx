@@ -32,7 +32,7 @@ const Navigation: React.FC = () => {
             >
               Upload Invoice
             </Link>
-            {accessConfig && accessConfig.canApproveInvoices === true && (
+            {accessConfig?.canApproveInvoices && (
               <Link 
                 to="/approve"
                 className={`text-gray-700 hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium ${

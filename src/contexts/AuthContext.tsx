@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 
 interface AccessConfig {
   canApproveInvoices: boolean;
@@ -72,27 +71,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const data = await response.json();
       
-      // Check if the login was successful by examining the status
-      if (data.status !== 1) {
-        toast.error("Invalid credentials");
-        throw new Error("Invalid credentials");
-      }
+      setAuthState({
+        isAuthenticated: true,
+        token: data.token,
+        accessConfig: {
+          canApproveInvoices: data.accessConfig?.canApproveInvoices || false,
+        },
+      });
       
-      // Only update state if login was successful
-      if (data.token) {
-        setAuthState({
-          isAuthenticated: true,
-          token: data.token,
-          accessConfig: {
-            canApproveInvoices: data.accessConfig?.canApproveInvoices || false,
-          },
-        });
-        
-        navigate("/");
-      } else {
-        toast.error("Login failed - No token received");
-        throw new Error("No token received");
-      }
+      navigate("/");
     } catch (error) {
       console.error("Login error:", error);
       throw error;
