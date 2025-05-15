@@ -10,10 +10,9 @@ export const getAuthHeaders = (): HeadersInit => {
   
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
-    console.log("Using token in headers:", token);
-  } else {
-    console.warn("No auth token found in localStorage");
   }
+
+  console.log(token);
   
   return headers;
 };
@@ -24,19 +23,14 @@ export const uploadInvoice = async (file: File, sessionId: string): Promise<any>
     formData.append("invoice_file", file);
     formData.append("sessionId", sessionId);
     
-    // Don't include token in FormData as headers already contain it
-    
-    const headers = getAuthHeaders();
-    console.log("Request headers:", headers);
-    
     const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/upload", {
       method: "POST",
-      headers: headers,
+      headers: getAuthHeaders(),
       body: formData,
     });
     
     if (!response.ok) {
-      throw new Error(`Error: ${response.status} - ${await response.text()}`);
+      throw new Error(`Error: ${response.status}`);
     }
     
     return await response.json();

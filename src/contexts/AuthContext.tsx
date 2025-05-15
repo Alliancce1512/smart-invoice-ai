@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 
 interface AccessConfig {
   canApproveInvoices: boolean;
@@ -72,28 +71,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const data = await response.json();
       
-      // For testing/debugging purposes - hard code a valid token if the API doesn't return one
-      const tokenToUse = data.token || "test_token_123456";
-      
-      // Set default access config if none is provided
-      const accessConfigToUse = data.accessConfig || { canApproveInvoices: true };
-      
       setAuthState({
         isAuthenticated: true,
-        token: tokenToUse,
+        token: data.token,
         accessConfig: {
-          canApproveInvoices: accessConfigToUse.canApproveInvoices,
+          canApproveInvoices: data.accessConfig?.canApproveInvoices || false,
         },
       });
       
-      // Log the token for debugging
-      console.log("Token after login:", tokenToUse);
-      
-      toast.success("Login successful!");
       navigate("/");
     } catch (error) {
       console.error("Login error:", error);
-      toast.error("Login failed. Please check your credentials.");
       throw error;
     }
   };
