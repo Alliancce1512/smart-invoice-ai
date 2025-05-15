@@ -90,3 +90,30 @@ export const getInvoicesForApproval = async (username: string): Promise<any[]> =
     throw error;
   }
 };
+
+export const approveInvoice = async (invoice: any): Promise<any> => {
+  try {
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/send-invoice", {
+      method: "POST",
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...invoice,
+        approved: true,
+        submittedBy: invoice.submittedBy,
+      }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error("Failed to approve invoice:", error);
+    toast.error("Failed to approve invoice. Please try again.");
+    throw error;
+  }
+};

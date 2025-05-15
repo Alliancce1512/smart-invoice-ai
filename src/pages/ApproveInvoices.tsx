@@ -9,6 +9,7 @@ import { Check, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
+import { getInvoicesForApproval, approveInvoice } from "@/utils/api";
 
 interface Invoice {
   id: number;
@@ -28,27 +29,10 @@ const ApproveInvoices = () => {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   
   const fetchInvoices = async (): Promise<Invoice[]> => {
-    try {
-      const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/get-invoices-for-approval", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: userId,
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error("Failed to fetch invoices:", error);
-      toast.error("Failed to load invoices for approval.");
+    if (!userId) {
       return [];
     }
+    return await getInvoicesForApproval(userId);
   };
 
   const { data: invoices, isLoading, isError, refetch } = useQuery({
@@ -56,24 +40,9 @@ const ApproveInvoices = () => {
     queryFn: fetchInvoices,
   });
 
-  const approveInvoice = async (invoice: Invoice) => {
+  const handleApprove = async (invoice: Invoice) => {
     try {
-      const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/send-invoice", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...invoice,
-          approved: true,
-          submittedBy: invoice.submittedBy,
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
-      
+      await approveInvoice(invoice);
       toast.success("Invoice approved successfully.");
       refetch();
     } catch (error) {
@@ -185,7 +154,7 @@ const ApproveInvoices = () => {
                                 <AlertDialogAction
                                   onClick={() => {
                                     if (selectedInvoice) {
-                                      approveInvoice(selectedInvoice);
+                                      handleApprove(selectedInvoice);
                                     }
                                   }}
                                 >
