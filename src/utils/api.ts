@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 
 export const getAuthHeaders = (): HeadersInit => {
@@ -68,7 +67,7 @@ export const submitInvoice = async (invoiceData: any, canApprove: boolean): Prom
   }
 };
 
-export const getInvoicesForApproval = async (username: string): Promise<any[]> => {
+export const getInvoicesForApproval = async (username: string): Promise<any> => {
   try {
     const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/get-invoices-for-approval", {
       method: "POST",

@@ -33,7 +33,8 @@ const ApproveInvoices = () => {
     if (!userId) {
       return [];
     }
-    return await getInvoicesForApproval(userId);
+    const response = await getInvoicesForApproval(userId);
+    return response.invoices || []; // Extract invoices from response or return empty array
   };
 
   const { data, isLoading, isError, refetch } = useQuery({
@@ -41,7 +42,7 @@ const ApproveInvoices = () => {
     queryFn: fetchInvoices,
   });
   
-  const invoices: Invoice[] = data?.invoices || [];
+  const invoices: Invoice[] = data || []; // Use data directly as it should be Invoice[]
 
   const handleApprove = async (invoice: Invoice) => {
     try {
