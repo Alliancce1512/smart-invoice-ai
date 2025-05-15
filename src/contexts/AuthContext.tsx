@@ -57,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (username: string, password: string): Promise<void> => {
     try {
-      const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/login", {
+      const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
