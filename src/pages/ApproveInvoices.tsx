@@ -35,7 +35,7 @@ const ApproveInvoices = () => {
     return await getInvoicesForApproval(userId);
   };
 
-  const { data: invoices, isLoading, isError, refetch } = useQuery({
+  const { data?.invoices || []: invoices, isLoading, isError, refetch } = useQuery({
     queryKey: ["invoicesForApproval"],
     queryFn: fetchInvoices,
   });
