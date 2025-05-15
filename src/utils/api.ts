@@ -93,16 +93,17 @@ export const getInvoicesForApproval = async (username: string): Promise<any[]> =
 
 export const approveInvoice = async (invoice: any): Promise<any> => {
   try {
-    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/send-invoice", {
+    const username = localStorage.getItem("smartinvoice_user_id") || "";
+    
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/approve-invoice", {
       method: "POST",
       headers: {
         ...getAuthHeaders(),
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        ...invoice,
-        approved: true,
-        submittedBy: invoice.submittedBy,
+        username: username,
+        invoiceId: invoice.id,
       }),
     });
     
@@ -110,7 +111,16 @@ export const approveInvoice = async (invoice: any): Promise<any> => {
       throw new Error(`Error: ${response.status}`);
     }
     
-    return await response.json();
+    const result = await response.json();
+    
+    if (result.status === 0) {
+      toast.success("Invoice approved successfully.");
+    } else if (result.status === -1) {
+      toast.error("Failed to approve invoice. The update was not successful.");
+      throw new Error("Invoice approval failed");
+    }
+    
+    return result;
   } catch (error) {
     console.error("Failed to approve invoice:", error);
     toast.error("Failed to approve invoice. Please try again.");

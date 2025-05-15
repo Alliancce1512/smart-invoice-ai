@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { getInvoicesForApproval, approveInvoice } from "@/utils/api";
+import { format, parse } from "date-fns";
 
 interface Invoice {
   id: number;
@@ -45,11 +46,9 @@ const ApproveInvoices = () => {
   const handleApprove = async (invoice: Invoice) => {
     try {
       await approveInvoice(invoice);
-      toast.success("Invoice approved successfully.");
       refetch();
     } catch (error) {
       console.error("Failed to approve invoice:", error);
-      toast.error("Failed to approve invoice. Please try again.");
     }
   };
 
@@ -62,6 +61,22 @@ const ApproveInvoices = () => {
       hour: "2-digit",
       minute: "2-digit",
     }).format(date);
+  };
+  
+  const formatInvoiceDate = (dateString: string) => {
+    try {
+      // Try to parse the date and format it
+      const date = new Date(dateString);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return dateString; // Return original if invalid
+      }
+      
+      return format(date, "dd.MM.yyyy");
+    } catch {
+      return dateString;
+    }
   };
   
   const formatCurrency = (amount: number, currency: string) => {
@@ -127,7 +142,7 @@ const ApproveInvoices = () => {
                     {invoices.map((invoice) => (
                       <TableRow key={invoice.id}>
                         <TableCell className="font-medium">{invoice.vendor}</TableCell>
-                        <TableCell>{invoice.invoiceDate}</TableCell>
+                        <TableCell>{formatInvoiceDate(invoice.invoiceDate)}</TableCell>
                         <TableCell>{formatCurrency(invoice.amount, invoice.currency)}</TableCell>
                         <TableCell>{invoice.category}</TableCell>
                         <TableCell>{invoice.submittedBy}</TableCell>
