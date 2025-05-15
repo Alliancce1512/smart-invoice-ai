@@ -94,7 +94,7 @@ export const approveInvoice = async (invoice: any): Promise<any> => {
   try {
     const username = localStorage.getItem("smartinvoice_user_id") || "";
     
-    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/approve-invoice", {
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/approve-invoice", {
       method: "POST",
       headers: {
         ...getAuthHeaders(),
