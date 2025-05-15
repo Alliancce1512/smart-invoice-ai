@@ -8,6 +8,8 @@ import Index from "@/pages/Index";
 import Upload from "@/pages/Upload";
 import Results from "@/pages/Results";
 import Login from "@/pages/Login";
+import MyRequests from "@/pages/MyRequests";
+import ApprovedRequests from "@/pages/ApprovedRequests";
 import ApproveInvoices from "@/pages/ApproveInvoices";
 import NotFound from "@/pages/NotFound";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -55,6 +57,22 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <ApproveInvoices />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/requests" 
+                element={
+                  <ProtectedRoute>
+                    <MyRequests />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/approved" 
+                element={
+                  <ProtectedRoute>
+                    <ApprovedRequests />
                   </ProtectedRoute>
                 } 
               />

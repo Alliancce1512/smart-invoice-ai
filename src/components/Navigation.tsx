@@ -3,7 +3,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Inbox, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Navigation: React.FC = () => {
@@ -19,7 +19,7 @@ const Navigation: React.FC = () => {
     <nav className="bg-card shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <div className="flex space-x-8">
+          <div className="flex space-x-4 overflow-x-auto">
             <Link 
               to="/"
               className={`text-foreground hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium ${
@@ -36,15 +36,35 @@ const Navigation: React.FC = () => {
             >
               Upload Invoice
             </Link>
+            <Link 
+              to="/requests"
+              className={`text-foreground hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium flex items-center ${
+                location.pathname === "/requests" ? "border-b-2 border-smartinvoice-purple" : ""
+              }`}
+            >
+              <Inbox className="w-4 h-4 mr-1" />
+              My Requests
+            </Link>
             {accessConfig?.canApproveInvoices && (
-              <Link 
-                to="/approve"
-                className={`text-foreground hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium ${
-                  location.pathname === "/approve" ? "border-b-2 border-smartinvoice-purple" : ""
-                }`}
-              >
-                Approve Invoices
-              </Link>
+              <>
+                <Link 
+                  to="/approve"
+                  className={`text-foreground hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium ${
+                    location.pathname === "/approve" ? "border-b-2 border-smartinvoice-purple" : ""
+                  }`}
+                >
+                  Approve Invoices
+                </Link>
+                <Link 
+                  to="/approved"
+                  className={`text-foreground hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium flex items-center ${
+                    location.pathname === "/approved" ? "border-b-2 border-smartinvoice-purple" : ""
+                  }`}
+                >
+                  <Users className="w-4 h-4 mr-1" />
+                  Approved Requests
+                </Link>
+              </>
             )}
           </div>
           <div className="flex items-center space-x-4">
