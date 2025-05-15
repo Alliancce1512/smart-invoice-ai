@@ -1,93 +1,98 @@
 
-import React from "react";
-import Layout from "@/components/Layout";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "react-router-dom";
+import Layout from "@/components/Layout";
+import { useAuth } from "@/contexts/AuthContext";
+import { Upload, Inbox, FileCheck } from "lucide-react";
+import { toast } from "sonner";
 
-const Index = () => {
+const Index: React.FC = () => {
+  const { accessConfig } = useAuth();
+  
+  useEffect(() => {
+    // Check if there's a success message from invoice submission
+    const successMessage = sessionStorage.getItem("invoiceSuccessMessage");
+    if (successMessage) {
+      try {
+        const { vendor, action } = JSON.parse(successMessage);
+        toast.success(`Invoice for ${vendor} has been ${action} successfully!`);
+        // Remove the message after displaying it
+        sessionStorage.removeItem("invoiceSuccessMessage");
+      } catch (error) {
+        console.error("Error parsing success message:", error);
+      }
+    }
+  }, []);
+
   return (
     <Layout>
-      <div className="flex flex-col items-center text-center animate-fade-in py-12">
-        <div className="max-w-2xl">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-smartinvoice-purple to-smartinvoice-bright-blue">
-            SmartInvoice AI
-          </h1>
-          
-          <p className="text-xl md:text-2xl mb-10 text-gray-700">
-            AI-powered invoice processing. Upload, extract, and auto-approve in seconds.
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            <div className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-smartinvoice-soft-gray rounded-full flex items-center justify-center mb-4 mx-auto">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-6 w-6 text-smartinvoice-purple"
-                >
-                  <path d="M14 3v4a1 1 0 0 0 1 1h4"></path>
-                  <path d="M5 8v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7.5L14.5 3H6a1 1 0 0 0-1 1z"></path>
-                </svg>
+      <div className="w-full max-w-4xl mx-auto py-8">
+        <h1 className="text-3xl font-bold mb-2 text-center">Welcome to SmartInvoice AI</h1>
+        <p className="text-gray-600 mb-8 text-center dark:text-gray-300">
+          Easily manage, process, and approve invoices with the power of AI
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <Card className="hover:shadow-lg transition-shadow dark:bg-gray-800/80">
+            <CardContent className="pt-6">
+              <div className="text-center mb-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-full mx-auto flex items-center justify-center dark:bg-purple-900/30">
+                  <Upload className="h-6 w-6 text-smartinvoice-purple" />
+                </div>
               </div>
-              <h3 className="font-semibold text-lg mb-2">Upload</h3>
-              <p className="text-gray-600">
-                Drag and drop your invoices or upload them in seconds
+              <h2 className="text-xl font-semibold text-center mb-4 dark:text-white">Upload Invoice</h2>
+              <p className="text-gray-500 mb-6 text-center dark:text-gray-400">
+                Upload and process invoices instantly with our intelligent OCR system.
               </p>
-            </div>
-            
-            <div className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-smartinvoice-soft-gray rounded-full flex items-center justify-center mb-4 mx-auto">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-6 w-6 text-smartinvoice-purple"
-                >
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                  <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                </svg>
+              <div className="flex justify-center">
+                <Button asChild className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark">
+                  <Link to="/upload">Upload Invoice</Link>
+                </Button>
               </div>
-              <h3 className="font-semibold text-lg mb-2">Extract</h3>
-              <p className="text-gray-600">
-                Our AI automatically extracts all relevant information
-              </p>
-            </div>
-            
-            <div className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-smartinvoice-soft-gray rounded-full flex items-center justify-center mb-4 mx-auto">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-6 w-6 text-smartinvoice-purple"
-                >
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow dark:bg-gray-800/80">
+            <CardContent className="pt-6">
+              <div className="text-center mb-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-full mx-auto flex items-center justify-center dark:bg-purple-900/30">
+                  <Inbox className="h-6 w-6 text-smartinvoice-purple" />
+                </div>
               </div>
-              <h3 className="font-semibold text-lg mb-2">Approve</h3>
-              <p className="text-gray-600">
-                Get smart approval recommendations based on your history
+              <h2 className="text-xl font-semibold text-center mb-4 dark:text-white">My Requests</h2>
+              <p className="text-gray-500 mb-6 text-center dark:text-gray-400">
+                View all your submitted invoices and check their approval status.
               </p>
-            </div>
-          </div>
-          
-          <Link to="/upload" className="inline-block">
-            <Button size="lg" className="text-lg bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark hover-scale">
-              Get Started
-            </Button>
-          </Link>
+              <div className="flex justify-center">
+                <Button asChild variant="outline">
+                  <Link to="/requests">View Requests</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {accessConfig?.canApproveInvoices && (
+            <Card className="hover:shadow-lg transition-shadow dark:bg-gray-800/80">
+              <CardContent className="pt-6">
+                <div className="text-center mb-4">
+                  <div className="w-12 h-12 bg-purple-100 rounded-full mx-auto flex items-center justify-center dark:bg-purple-900/30">
+                    <FileCheck className="h-6 w-6 text-smartinvoice-purple" />
+                  </div>
+                </div>
+                <h2 className="text-xl font-semibold text-center mb-4 dark:text-white">Approve Invoices</h2>
+                <p className="text-gray-500 mb-6 text-center dark:text-gray-400">
+                  Review and approve pending invoices from your team members.
+                </p>
+                <div className="flex justify-center">
+                  <Button asChild variant="outline">
+                    <Link to="/approve">Approve Invoices</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </Layout>

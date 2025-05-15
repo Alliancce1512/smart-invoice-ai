@@ -128,10 +128,14 @@ const InvoiceResult = () => {
       };
 
       // Submit the invoice
-      await submitInvoice(submitData, canApproveInvoices);
+      const response = await submitInvoice(submitData, canApproveInvoices);
       
-      // Show confirmation dialog
-      setShowConfirmation(true);
+      if (response.status === 0) {
+        // Show confirmation dialog
+        setShowConfirmation(true);
+      } else {
+        toast.error("Failed to submit invoice. Please try again.");
+      }
     } catch (error) {
       console.error("Error submitting invoice:", error);
       toast.error("Failed to submit invoice. Please try again.");
@@ -142,6 +146,13 @@ const InvoiceResult = () => {
 
   const handleCloseConfirmation = () => {
     setShowConfirmation(false);
+    
+    // Store success message to show on the home page
+    sessionStorage.setItem("invoiceSuccessMessage", JSON.stringify({
+      vendor: invoiceData.vendor,
+      action: canApproveInvoices ? 'approved' : 'submitted'
+    }));
+    
     // Redirect to home after confirmation
     navigate("/");
   };

@@ -3,7 +3,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Moon, Sun, Inbox, Users } from "lucide-react";
+import { Moon, Sun, Inbox, Users, Home, Upload, FileCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Navigation: React.FC = () => {
@@ -22,18 +22,20 @@ const Navigation: React.FC = () => {
           <div className="flex space-x-4 overflow-x-auto">
             <Link 
               to="/"
-              className={`text-foreground hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium ${
+              className={`text-foreground hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium flex items-center ${
                 location.pathname === "/" ? "border-b-2 border-smartinvoice-purple" : ""
               }`}
             >
+              <Home className="w-4 h-4 mr-1" />
               Home
             </Link>
             <Link 
               to="/upload"
-              className={`text-foreground hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium ${
+              className={`text-foreground hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium flex items-center ${
                 location.pathname === "/upload" ? "border-b-2 border-smartinvoice-purple" : ""
               }`}
             >
+              <Upload className="w-4 h-4 mr-1" />
               Upload Invoice
             </Link>
             <Link 
@@ -49,10 +51,11 @@ const Navigation: React.FC = () => {
               <>
                 <Link 
                   to="/approve"
-                  className={`text-foreground hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium ${
+                  className={`text-foreground hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium flex items-center ${
                     location.pathname === "/approve" ? "border-b-2 border-smartinvoice-purple" : ""
                   }`}
                 >
+                  <FileCheck className="w-4 h-4 mr-1" />
                   Approve Invoices
                 </Link>
                 <Link 

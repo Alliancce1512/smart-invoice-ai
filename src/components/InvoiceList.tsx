@@ -59,7 +59,6 @@ const InvoiceList: React.FC<InvoiceListProps> = ({ invoices, showApprovalStatus 
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
               <TableHead>Vendor</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Amount</TableHead>
@@ -70,7 +69,6 @@ const InvoiceList: React.FC<InvoiceListProps> = ({ invoices, showApprovalStatus 
           <TableBody>
             {invoices.map((invoice) => (
               <TableRow key={invoice.id}>
-                <TableCell className="font-medium">{invoice.id}</TableCell>
                 <TableCell>
                   <div className="flex items-center">
                     <FileTextIcon className="w-4 h-4 mr-2 text-muted-foreground" />
