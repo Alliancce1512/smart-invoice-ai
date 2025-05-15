@@ -23,7 +23,7 @@ export const uploadInvoice = async (file: File, sessionId: string): Promise<any>
     formData.append("invoice_file", file);
     formData.append("sessionId", sessionId);
     
-    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/upload", {
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/upload", {
       method: "POST",
       headers: getAuthHeaders(),
       body: formData,
