@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -33,7 +34,9 @@ const ApproveInvoices = () => {
       return [];
     }
     const response = await getInvoicesForApproval(userId);
-    return response.invoices || []; // Extract invoices from response or return empty array
+    return response.invoices && Array.isArray(response.invoices) && response.invoices.length > 0 
+      ? response.invoices 
+      : [];
   };
 
   const { data, isLoading, isError, refetch } = useQuery({
@@ -42,13 +45,16 @@ const ApproveInvoices = () => {
   });
   
   const invoices: Invoice[] = data || []; // Use data directly as it should be Invoice[]
+  const hasInvoices = Array.isArray(invoices) && invoices.length > 0 && invoices[0] && Object.keys(invoices[0]).length > 0;
 
   const handleApprove = async (invoice: Invoice) => {
     try {
       await approveInvoice(invoice);
+      toast.success("Invoice approved successfully.");
       refetch();
     } catch (error) {
       console.error("Failed to approve invoice:", error);
+      toast.error("Failed to approve invoice. Please try again.");
     }
   };
 
@@ -126,7 +132,7 @@ const ApproveInvoices = () => {
           <div className="text-center py-8">
             <p className="text-red-500">Error loading invoices. Please try again.</p>
           </div>
-        ) : invoices && invoices.length > 0 ? (
+        ) : hasInvoices ? (
           <Card>
             <CardHeader className="pb-0">
               <CardTitle>Pending Invoices</CardTitle>
@@ -149,12 +155,16 @@ const ApproveInvoices = () => {
                   </TableHeader>
                   <TableBody>
                     {invoices.map((invoice) => (
-                      <TableRow key={invoice.id}>
-                        <TableCell className="font-medium">{invoice.vendor}</TableCell>
-                        <TableCell>{formatInvoiceDate(invoice.invoiceDate)}</TableCell>
-                        <TableCell>{formatCurrency(invoice.amount, invoice.currency)}</TableCell>
-                        <TableCell>{invoice.category}</TableCell>
-                        <TableCell>{invoice.submittedBy}</TableCell>
+                      <TableRow key={invoice.id || Math.random()}>
+                        <TableCell className="font-medium">{invoice.vendor || 'N/A'}</TableCell>
+                        <TableCell>{invoice.invoiceDate ? formatInvoiceDate(invoice.invoiceDate) : 'N/A'}</TableCell>
+                        <TableCell>
+                          {invoice.amount !== undefined && !isNaN(invoice.amount) 
+                            ? formatCurrency(invoice.amount, invoice.currency)
+                            : 'N/A'}
+                        </TableCell>
+                        <TableCell>{invoice.category || 'N/A'}</TableCell>
+                        <TableCell>{invoice.submittedBy || 'N/A'}</TableCell>
                         <TableCell>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -172,7 +182,7 @@ const ApproveInvoices = () => {
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Approve Invoice</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to approve the invoice from {selectedInvoice?.vendor} for {selectedInvoice ? formatCurrency(selectedInvoice.amount, selectedInvoice.currency) : ''}?
+                                  Are you sure you want to approve the invoice from {selectedInvoice?.vendor || 'Unknown'} for {selectedInvoice && selectedInvoice.amount !== undefined && !isNaN(selectedInvoice.amount) ? formatCurrency(selectedInvoice.amount, selectedInvoice.currency) : 'N/A'}?
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>

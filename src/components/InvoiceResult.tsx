@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { submitInvoice } from "@/utils/api";
@@ -28,7 +27,6 @@ interface InvoiceData {
 const InvoiceResult = () => {
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
   const [showJson, setShowJson] = useState(false);
-  const [category, setCategory] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const navigate = useNavigate();
@@ -42,7 +40,6 @@ const InvoiceResult = () => {
       try {
         const parsedData = JSON.parse(storedData);
         setInvoiceData(parsedData);
-        setCategory(parsedData.category || "");
       } catch (error) {
         console.error("Failed to parse invoice data:", error);
         navigate("/");
@@ -114,11 +111,6 @@ const InvoiceResult = () => {
     }
   };
 
-  const handleCategoryChange = (value: string) => {
-    setCategory(value);
-    setInvoiceData(prev => prev ? { ...prev, category: value } : null);
-  };
-
   const handleSubmitInvoice = async () => {
     if (!invoiceData) return;
     
@@ -132,7 +124,7 @@ const InvoiceResult = () => {
         amount: invoiceData.amount,
         currency: invoiceData.currency,
         iban: invoiceData.iban || "",
-        category: category || invoiceData.category || "Other",
+        category: invoiceData.category || "Other",
       };
 
       // Submit the invoice
@@ -150,6 +142,7 @@ const InvoiceResult = () => {
 
   const handleCloseConfirmation = () => {
     setShowConfirmation(false);
+    // Redirect to home after confirmation
     navigate("/");
   };
 
@@ -205,21 +198,9 @@ const InvoiceResult = () => {
 
               <div className="pt-4">
                 <Label htmlFor="category" className="text-gray-500 dark:text-gray-300 block mb-1">Expense Category</Label>
-                <Select value={category} onValueChange={handleCategoryChange}>
-                  <SelectTrigger className="w-full md:w-[280px] dark:bg-gray-700 dark:text-white dark:border-gray-600">
-                    <SelectValue placeholder="Select expense category" />
-                  </SelectTrigger>
-                  <SelectContent className="dark:bg-gray-800 dark:text-white dark:border-gray-700">
-                    <SelectItem value="Office Supplies">Office Supplies</SelectItem>
-                    <SelectItem value="Software & Services">Software & Services</SelectItem>
-                    <SelectItem value="Travel">Travel</SelectItem>
-                    <SelectItem value="Marketing">Marketing</SelectItem>
-                    <SelectItem value="Equipment">Equipment</SelectItem>
-                    <SelectItem value="Utilities">Utilities</SelectItem>
-                    <SelectItem value="Cloud Services">Cloud Services</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div id="category" className="font-medium px-3 py-2 border border-gray-200 rounded bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600">
+                  {invoiceData.category || "Other"}
+                </div>
               </div>
 
               <div className="flex justify-end space-x-3 pt-4">
@@ -259,7 +240,7 @@ const InvoiceResult = () => {
           </div>
           <DialogFooter>
             <Button onClick={handleCloseConfirmation} className="w-full sm:w-auto bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark">
-              Process Another Invoice
+              Back to Home
             </Button>
           </DialogFooter>
         </DialogContent>

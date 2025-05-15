@@ -80,6 +80,16 @@ const FileUploader = ({ onFileUpload, isUploading }: FileUploaderProps) => {
     }
   };
 
+  // Reset file input when clicking "Change File"
+  const resetFile = () => {
+    setFile(null);
+    // Reset the file input element
+    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
   return (
     <>
       <div className="w-full max-w-2xl mx-auto">
@@ -135,7 +145,7 @@ const FileUploader = ({ onFileUpload, isUploading }: FileUploaderProps) => {
           ) : (
             <div className="flex space-x-4 justify-center">
               <button
-                onClick={() => setFile(null)}
+                onClick={resetFile}
                 className="btn-secondary"
                 disabled={isUploading}
               >
