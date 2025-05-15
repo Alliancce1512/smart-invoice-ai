@@ -40,3 +40,30 @@ export const uploadInvoice = async (file: File, sessionId: string): Promise<any>
     throw error;
   }
 };
+
+export const submitInvoice = async (invoiceData: any, canApprove: boolean): Promise<any> => {
+  try {
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/send-invoice", {
+      method: "POST",
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...invoiceData,
+        approved: canApprove || false,
+        submittedBy: localStorage.getItem("smartinvoice_user_id") || "unknown_user"
+      }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error("Submit error:", error);
+    toast.error("Failed to submit invoice. Please try again.");
+    throw error;
+  }
+};

@@ -10,12 +10,14 @@ interface AccessConfig {
 interface AuthState {
   isAuthenticated: boolean;
   token: string | null;
+  userId: string | null;
   accessConfig: AccessConfig | null;
 }
 
 interface LoginResponse {
   status: number;
   token: string;
+  userId?: string;
   accessConfig: AccessConfig | null;
 }
 
@@ -27,6 +29,7 @@ interface AuthContextType extends AuthState {
 const initialAuthState: AuthState = {
   isAuthenticated: false,
   token: null,
+  userId: null,
   accessConfig: null,
 };
 
@@ -37,11 +40,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check if there's existing auth data in localStorage
     const savedToken = localStorage.getItem("smartinvoice_token");
     const savedAccessConfig = localStorage.getItem("smartinvoice_accessConfig");
+    const savedUserId = localStorage.getItem("smartinvoice_user_id");
     
     if (savedToken && savedAccessConfig) {
       return {
         isAuthenticated: true,
         token: savedToken,
+        userId: savedUserId,
         accessConfig: JSON.parse(savedAccessConfig),
       };
     }
@@ -57,9 +62,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (authState.isAuthenticated && authState.token) {
       localStorage.setItem("smartinvoice_token", authState.token);
       localStorage.setItem("smartinvoice_accessConfig", JSON.stringify(authState.accessConfig));
+      if (authState.userId) {
+        localStorage.setItem("smartinvoice_user_id", authState.userId);
+      }
     } else {
       localStorage.removeItem("smartinvoice_token");
       localStorage.removeItem("smartinvoice_accessConfig");
+      localStorage.removeItem("smartinvoice_user_id");
     }
   }, [authState]);
 
@@ -84,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAuthState({
           isAuthenticated: true,
           token: data.token,
+          userId: data.userId || username, // Store userId or fallback to username
           accessConfig: {
             canApproveInvoices: data.accessConfig?.canApproveInvoices || false,
           },
@@ -105,6 +115,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Reset theme to light mode
     setTheme("light");
+    
+    // Clear session storage
+    sessionStorage.clear();
     
     // Navigate to login
     navigate("/login");

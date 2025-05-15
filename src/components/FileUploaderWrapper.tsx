@@ -20,6 +20,9 @@ const FileUploaderWrapper: React.FC = () => {
     setIsUploading(true);
     
     try {
+      // Clear any previous invoice data from session storage
+      sessionStorage.removeItem("invoiceData");
+      
       const data = await uploadInvoice(file, sessionId);
       
       // Store the invoice data in session storage
