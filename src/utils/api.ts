@@ -11,6 +11,8 @@ export const getAuthHeaders = (): HeadersInit => {
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
+
+  console.log(token);
   
   return headers;
 };
