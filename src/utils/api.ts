@@ -67,3 +67,26 @@ export const submitInvoice = async (invoiceData: any, canApprove: boolean): Prom
     throw error;
   }
 };
+
+export const getInvoicesForApproval = async (username: string): Promise<any[]> => {
+  try {
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/get-invoices-for-approval", {
+      method: "POST",
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error("Failed to fetch invoices for approval:", error);
+    toast.error("Failed to load invoices for approval.");
+    throw error;
+  }
+};
