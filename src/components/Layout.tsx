@@ -1,7 +1,6 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import Navigation from "./Navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -23,7 +22,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="container mx-auto flex justify-between items-center">
           <Link 
             to="/" 
-            className="flex items-center space-x-2 text-2xl font-bold text-smartinvoice-dark hover:text-smartinvoice-purple transition-colors"
+            className="flex items-center space-x-2 text-2xl font-bold text-foreground hover:text-smartinvoice-purple transition-colors"
           >
             <svg
               viewBox="0 0 24 24"
@@ -50,8 +49,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {children}
       </main>
 
-      <footer className="py-6 border-t border-gray-100">
-        <div className="container mx-auto text-center text-sm text-gray-500">
+      <footer className="py-6 border-t border-gray-100 dark:border-gray-800">
+        <div className="container mx-auto text-center text-sm text-gray-500 dark:text-gray-400">
           © {new Date().getFullYear()} SmartInvoice AI. All rights reserved.
         </div>
       </footer>

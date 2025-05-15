@@ -2,9 +2,13 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Navigation: React.FC = () => {
   const { isAuthenticated, accessConfig, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
 
   if (!isAuthenticated) {
@@ -12,13 +16,13 @@ const Navigation: React.FC = () => {
   }
 
   return (
-    <nav className="bg-white shadow-sm">
+    <nav className="bg-card shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex space-x-8">
             <Link 
               to="/"
-              className={`text-gray-700 hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium ${
+              className={`text-foreground hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium ${
                 location.pathname === "/" ? "border-b-2 border-smartinvoice-purple" : ""
               }`}
             >
@@ -26,7 +30,7 @@ const Navigation: React.FC = () => {
             </Link>
             <Link 
               to="/upload"
-              className={`text-gray-700 hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium ${
+              className={`text-foreground hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium ${
                 location.pathname === "/upload" ? "border-b-2 border-smartinvoice-purple" : ""
               }`}
             >
@@ -35,7 +39,7 @@ const Navigation: React.FC = () => {
             {accessConfig?.canApproveInvoices && (
               <Link 
                 to="/approve"
-                className={`text-gray-700 hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium ${
+                className={`text-foreground hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium ${
                   location.pathname === "/approve" ? "border-b-2 border-smartinvoice-purple" : ""
                 }`}
               >
@@ -43,10 +47,23 @@ const Navigation: React.FC = () => {
               </Link>
             )}
           </div>
-          <div>
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="rounded-full"
+              aria-label="Toggle theme"
+            >
+              {theme === "light" ? (
+                <Moon className="h-5 w-5" />
+              ) : (
+                <Sun className="h-5 w-5" />
+              )}
+            </Button>
             <button
               onClick={logout}
-              className="text-gray-700 hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium"
+              className="text-foreground hover:text-smartinvoice-purple px-3 py-2 text-sm font-medium"
             >
               Logout
             </button>

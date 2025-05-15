@@ -18,7 +18,6 @@ const Login = () => {
     e.preventDefault();
     if (!username || !password) {
       toast({
-        title: "Error",
         description: "Please fill in all fields",
         variant: "destructive",
       });
@@ -27,15 +26,23 @@ const Login = () => {
 
     setIsLoading(true);
     try {
-      await login(username, password);
+      const response = await login(username, password);
+      
+      // Check if login failed due to incorrect credentials
+      if (response && response.status === -1) {
+        toast({
+          description: "Incorrect username or password",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       toast({
-        title: "Success",
         description: "Successfully logged in",
       });
     } catch (error) {
       toast({
-        title: "Login Failed",
-        description: "Incorrect username or password",
+        description: "Login failed. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -46,8 +53,8 @@ const Login = () => {
   return (
     <Layout>
       <div className="w-full max-w-md mx-auto py-12">
-        <div className="bg-white p-8 rounded-xl shadow-md">
-          <h1 className="text-2xl font-bold text-center mb-6">Login to SmartInvoice AI</h1>
+        <div className="bg-card p-8 rounded-xl shadow-md">
+          <h1 className="text-2xl font-bold text-center mb-6 text-foreground">Login to SmartInvoice AI</h1>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">

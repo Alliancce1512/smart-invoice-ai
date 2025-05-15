@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface AccessConfig {
   canApproveInvoices: boolean;
@@ -12,8 +13,14 @@ interface AuthState {
   accessConfig: AccessConfig | null;
 }
 
+interface LoginResponse {
+  status: number;
+  token: string;
+  accessConfig: AccessConfig | null;
+}
+
 interface AuthContextType extends AuthState {
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<LoginResponse | undefined>;
   logout: () => void;
 }
 
@@ -43,6 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
   
   const navigate = useNavigate();
+  const { setTheme } = useTheme();
 
   // Save auth data to localStorage whenever it changes
   useEffect(() => {
@@ -55,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [authState]);
 
-  const login = async (username: string, password: string): Promise<void> => {
+  const login = async (username: string, password: string): Promise<LoginResponse | undefined> => {
     try {
       const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/login", {
         method: "POST",
@@ -71,15 +79,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const data = await response.json();
       
-      setAuthState({
-        isAuthenticated: true,
-        token: data.token,
-        accessConfig: {
-          canApproveInvoices: data.accessConfig?.canApproveInvoices || false,
-        },
-      });
+      // Check if login was successful
+      if (data.status === 0) {
+        setAuthState({
+          isAuthenticated: true,
+          token: data.token,
+          accessConfig: {
+            canApproveInvoices: data.accessConfig?.canApproveInvoices || false,
+          },
+        });
+        
+        navigate("/");
+      }
       
-      navigate("/");
+      return data;
     } catch (error) {
       console.error("Login error:", error);
       throw error;
@@ -87,7 +100,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    // Reset auth state
     setAuthState(initialAuthState);
+    
+    // Reset theme to light mode
+    setTheme("light");
+    
+    // Navigate to login
     navigate("/login");
   };
 

@@ -100,7 +100,7 @@
   }
 
   .gradient-background {
-    @apply bg-gradient-to-br from-smartinvoice-soft-gray via-white to-smartinvoice-soft-gray;
+    @apply bg-gradient-to-br from-smartinvoice-soft-gray via-white to-smartinvoice-soft-gray dark:from-gray-900 dark:via-gray-800 dark:to-gray-900;
   }
 
   .btn-primary {
@@ -108,11 +108,11 @@
   }
   
   .btn-secondary {
-    @apply bg-white hover:bg-gray-50 text-smartinvoice-dark border border-gray-200 font-medium py-2 px-4 rounded-md transition-colors duration-200;
+    @apply bg-white hover:bg-gray-50 text-smartinvoice-dark border border-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-white dark:border-gray-700 font-medium py-2 px-4 rounded-md transition-colors duration-200;
   }
 
   .card-shadow {
-    @apply shadow-lg shadow-smartinvoice-purple/10;
+    @apply shadow-lg shadow-smartinvoice-purple/10 dark:shadow-smartinvoice-purple/5;
   }
 }
 
@@ -122,6 +122,10 @@
   opacity: 0.3;
   filter: blur(40px);
   z-index: -1;
+}
+
+.dark .abstract-shape {
+  opacity: 0.15;
 }
 
 .abstract-shape.shape1 {
