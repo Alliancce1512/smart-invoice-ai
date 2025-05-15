@@ -43,7 +43,7 @@ export const uploadInvoice = async (file: File, sessionId: string): Promise<any>
 
 export const submitInvoice = async (invoiceData: any, canApprove: boolean): Promise<any> => {
   try {
-    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/send-invoice", {
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/send-invoice", {
       method: "POST",
       headers: {
         ...getAuthHeaders(),
