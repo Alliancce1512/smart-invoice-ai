@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -46,41 +45,41 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 223 47% 11%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 222 47% 11%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 222 45% 11%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 255 70% 75%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 222 47% 16%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 223 47% 16%;
+    --muted-foreground: 217.9 32.6% 82%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 223 47% 16%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    --border: 223 47% 21%;
+    --input: 223 47% 21%;
     --ring: 255 70% 75%;
     
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-background: 224 47% 10%;
+    --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 255 70% 75%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-accent: 224 47% 15%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 224 47% 18%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
@@ -113,7 +112,20 @@
   }
 
   .card-shadow {
-    @apply shadow-lg shadow-smartinvoice-purple/10 dark:shadow-smartinvoice-purple/5;
+    @apply shadow-lg shadow-smartinvoice-purple/10 dark:shadow-blue-500/5;
+  }
+  
+  /* New dark mode specific components */
+  .dark .dark-glass {
+    @apply bg-gray-800/80 backdrop-blur-lg border border-gray-700;
+  }
+  
+  .dark .dark-input {
+    @apply bg-gray-800 border-gray-700 text-white placeholder:text-gray-500;
+  }
+  
+  .dark .dark-card {
+    @apply bg-gray-800/90 border-gray-700 shadow-lg shadow-blue-500/5;
   }
 }
 

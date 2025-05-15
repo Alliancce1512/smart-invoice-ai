@@ -16,11 +16,12 @@ interface InvoiceData {
   vendor: string;
   amount: number;
   currency: string;
-  date: string;
-  invoiceDate: string;
+  date?: string; // The date field from backend
+  invoiceDate?: string; // For compatibility with previous code
   iban: string;
   category: string;
-  approved: boolean;
+  needsApproval?: boolean; // From backend
+  approved?: boolean; // For compatibility with previous code
   [key: string]: any; // Allow for additional properties in the API response
 }
 
@@ -64,10 +65,29 @@ const InvoiceResult = () => {
     );
   }
 
+  // Get the invoice date from either the date or invoiceDate field
+  const getInvoiceDate = () => {
+    if (invoiceData.invoiceDate) return invoiceData.invoiceDate;
+    if (invoiceData.date) return invoiceData.date;
+    return "N/A";
+  };
+  
+  // Get the approval status from either needsApproval or approved field
+  const isApproved = () => {
+    if (invoiceData.approved !== undefined) return invoiceData.approved;
+    if (invoiceData.needsApproval !== undefined) return !invoiceData.needsApproval;
+    return false;
+  };
+
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
     
     try {
+      // Check if it's already in DD.MM.YYYY format
+      if (dateString.includes('.')) {
+        return dateString; // Return as-is if it's already formatted
+      }
+      
       const date = new Date(dateString);
       return date.toLocaleDateString("en-US", {
         year: "numeric",
@@ -108,7 +128,7 @@ const InvoiceResult = () => {
       // Prepare the invoice data for submission
       const submitData = {
         vendor: invoiceData.vendor,
-        invoiceDate: invoiceData.invoiceDate,
+        invoiceDate: invoiceData.invoiceDate || invoiceData.date,
         amount: invoiceData.amount,
         currency: invoiceData.currency,
         iban: invoiceData.iban || "",
@@ -135,20 +155,21 @@ const InvoiceResult = () => {
 
   return (
     <div className="w-full max-w-3xl mx-auto animate-scale-in">
-      <Card className="card-shadow dark:bg-gray-800">
+      <Card className="card-shadow dark:bg-gray-800/80 dark:border-gray-700">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-xl font-semibold">Invoice Details</CardTitle>
+          <CardTitle className="text-xl font-semibold dark:text-white">Invoice Details</CardTitle>
           <div className="flex items-center space-x-2">
             <Badge 
-              variant={invoiceData.approved ? "default" : "secondary"} 
-              className={`${invoiceData.approved ? "bg-green-600" : "bg-amber-500"} text-white`}
+              variant={isApproved() ? "default" : "secondary"} 
+              className={`${isApproved() ? "bg-green-600" : "bg-amber-500"} text-white`}
             >
-              {invoiceData.approved ? "Auto-approved" : "Needs review"}
+              {isApproved() ? "Auto-approved" : "Needs review"}
             </Badge>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={() => setShowJson(!showJson)}
+              className="dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 dark:border-gray-600"
             >
               {showJson ? "Hide JSON" : "View JSON"}
             </Button>
@@ -156,7 +177,7 @@ const InvoiceResult = () => {
         </CardHeader>
         <CardContent>
           {showJson ? (
-            <div className="bg-gray-50 p-4 rounded-md overflow-auto max-h-96 dark:bg-gray-900">
+            <div className="bg-gray-50 p-4 rounded-md overflow-auto max-h-96 dark:bg-gray-900 dark:text-gray-200">
               <pre className="text-xs text-gray-800 dark:text-gray-200">{JSON.stringify(invoiceData, null, 2)}</pre>
             </div>
           ) : (
@@ -174,7 +195,7 @@ const InvoiceResult = () => {
                 </div>
                 <div>
                   <Label htmlFor="date" className="text-gray-500 dark:text-gray-300">Invoice Date</Label>
-                  <div id="date" className="font-medium mt-1 dark:text-white">{invoiceData.invoiceDate}</div>
+                  <div id="date" className="font-medium mt-1 dark:text-white">{formatDate(getInvoiceDate())}</div>
                 </div>
                 <div>
                   <Label htmlFor="iban" className="text-gray-500 dark:text-gray-300">IBAN</Label>
@@ -185,10 +206,10 @@ const InvoiceResult = () => {
               <div className="pt-4">
                 <Label htmlFor="category" className="text-gray-500 dark:text-gray-300 block mb-1">Expense Category</Label>
                 <Select value={category} onValueChange={handleCategoryChange}>
-                  <SelectTrigger className="w-full md:w-[280px] dark:bg-gray-700 dark:text-white">
+                  <SelectTrigger className="w-full md:w-[280px] dark:bg-gray-700 dark:text-white dark:border-gray-600">
                     <SelectValue placeholder="Select expense category" />
                   </SelectTrigger>
-                  <SelectContent className="dark:bg-gray-800">
+                  <SelectContent className="dark:bg-gray-800 dark:text-white dark:border-gray-700">
                     <SelectItem value="Office Supplies">Office Supplies</SelectItem>
                     <SelectItem value="Software & Services">Software & Services</SelectItem>
                     <SelectItem value="Travel">Travel</SelectItem>
@@ -202,7 +223,11 @@ const InvoiceResult = () => {
               </div>
 
               <div className="flex justify-end space-x-3 pt-4">
-                <Button variant="outline" onClick={() => navigate("/")} className="dark:text-white dark:border-gray-600">
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate("/")} 
+                  className="dark:text-white dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
+                >
                   Process Another Invoice
                 </Button>
                 <Button 
@@ -220,9 +245,9 @@ const InvoiceResult = () => {
 
       {/* Confirmation Dialog */}
       <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
-        <DialogContent className="sm:max-w-md dark:bg-gray-800">
+        <DialogContent className="sm:max-w-md dark:bg-gray-800 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 dark:text-white">
               <CheckCircle className="h-6 w-6 text-green-500" />
               <span>Invoice {canApproveInvoices ? 'Approved' : 'Submitted'} Successfully</span>
             </DialogTitle>
