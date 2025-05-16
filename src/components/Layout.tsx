@@ -20,12 +20,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="abstract-shape shape3"></div>
       
       <header className="w-full border-b border-gray-100 dark:border-gray-800 shadow-sm">
-        <div className="container mx-auto p-4 flex justify-between items-center">
+        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <Link 
             to="/" 
-            className="flex items-center space-x-2 text-2xl font-bold text-foreground hover:text-smartinvoice-purple transition-colors"
+            className="flex items-center space-x-2 text-xl sm:text-2xl font-bold text-foreground hover:text-smartinvoice-purple transition-colors"
           >
-            <FileText className="h-8 w-8" />
+            <FileText className="h-7 w-7" />
             <span>SmartInvoice AI</span>
           </Link>
         </div>
@@ -37,7 +37,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {children}
       </main>
 
-      <footer className="py-6 border-t border-gray-100 dark:border-gray-800">
+      <footer className="py-4 sm:py-6 border-t border-gray-100 dark:border-gray-800">
         <div className="container mx-auto text-center text-sm text-gray-500 dark:text-gray-400">
           © {new Date().getFullYear()} SmartInvoice AI. All rights reserved.
         </div>

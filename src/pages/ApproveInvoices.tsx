@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Check, RefreshCw } from "lucide-react";
@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { getInvoicesForApproval, approveInvoice } from "@/utils/api";
-import { format, parse } from "date-fns";
 
 interface Invoice {
   id: number;
@@ -71,7 +70,7 @@ const ApproveInvoices = () => {
   
   const formatInvoiceDate = (dateString: string) => {
     try {
-      // Try to parse the date and format it
+      // Try to parse the date
       const date = new Date(dateString);
       
       // Check if date is valid
@@ -79,7 +78,12 @@ const ApproveInvoices = () => {
         return dateString; // Return original if invalid
       }
       
-      return format(date, "dd.MM.yyyy");
+      // Format to dd.MM.yyyy
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${day}.${month}.${year}`;
     } catch {
       return dateString;
     }
@@ -220,9 +224,7 @@ const ApproveInvoices = () => {
                 All invoices have been processed. Check back later for new submissions.
               </p>
             </CardContent>
-            <CardFooter>
-              <Button variant="outline" onClick={() => refetch()}>Refresh</Button>
-            </CardFooter>
+            {/* Removed the CardFooter with the duplicate Refresh button */}
           </Card>
         )}
       </div>

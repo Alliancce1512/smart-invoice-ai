@@ -76,21 +76,25 @@ const InvoiceResult = () => {
     return false;
   };
 
+  // Format the date to dd.MM.yyyy regardless of input format
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
     
     try {
-      // Check if it's already in DD.MM.YYYY format
-      if (dateString.includes('.')) {
-        return dateString; // Return as-is if it's already formatted
+      // Try to parse the date
+      const date = new Date(dateString);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return dateString; // Return original if invalid
       }
       
-      const date = new Date(dateString);
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-      });
+      // Format to dd.MM.yyyy
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${day}.${month}.${year}`;
     } catch (error) {
       console.error("Error formatting date:", error);
       return dateString; // Return the original string if parsing fails
@@ -117,10 +121,12 @@ const InvoiceResult = () => {
     setIsSubmitting(true);
     
     try {
-      // Prepare the invoice data for submission
+      // Prepare the invoice data for submission, ensuring date is in dd.MM.yyyy format
+      const formattedDate = formatDate(getInvoiceDate());
+      
       const submitData = {
         vendor: invoiceData.vendor,
-        invoiceDate: invoiceData.invoiceDate || invoiceData.date,
+        invoiceDate: formattedDate,
         amount: invoiceData.amount,
         currency: invoiceData.currency,
         iban: invoiceData.iban || "",
@@ -131,8 +137,14 @@ const InvoiceResult = () => {
       const response = await submitInvoice(submitData, canApproveInvoices);
       
       if (response.status === 0) {
-        // Show confirmation dialog
-        setShowConfirmation(true);
+        // Store success message to show on the home page
+        sessionStorage.setItem("invoiceSuccessMessage", JSON.stringify({
+          vendor: invoiceData.vendor,
+          action: canApproveInvoices ? 'approved' : 'submitted'
+        }));
+        
+        // Navigate to home after successful submission
+        navigate("/");
       } else {
         toast.error("Failed to submit invoice. Please try again.");
       }
@@ -144,17 +156,8 @@ const InvoiceResult = () => {
     }
   };
 
-  const handleCloseConfirmation = () => {
-    setShowConfirmation(false);
-    
-    // Store success message to show on the home page
-    sessionStorage.setItem("invoiceSuccessMessage", JSON.stringify({
-      vendor: invoiceData.vendor,
-      action: canApproveInvoices ? 'approved' : 'submitted'
-    }));
-    
-    // Redirect to home after confirmation
-    navigate("/");
+  const handleProcessAnother = () => {
+    navigate("/upload");
   };
 
   return (
@@ -216,13 +219,6 @@ const InvoiceResult = () => {
 
               <div className="flex justify-end space-x-3 pt-4">
                 <Button 
-                  variant="outline" 
-                  onClick={() => navigate("/")} 
-                  className="dark:text-white dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
-                >
-                  Process Another Invoice
-                </Button>
-                <Button 
                   className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark"
                   disabled={isSubmitting}
                   onClick={handleSubmitInvoice}
@@ -235,27 +231,7 @@ const InvoiceResult = () => {
         </CardContent>
       </Card>
 
-      {/* Confirmation Dialog */}
-      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
-        <DialogContent className="sm:max-w-md dark:bg-gray-800 dark:border-gray-700">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 dark:text-white">
-              <CheckCircle className="h-6 w-6 text-green-500" />
-              <span>Invoice {canApproveInvoices ? 'Approved' : 'Submitted'} Successfully</span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-gray-600 dark:text-gray-300">
-              The invoice for <span className="font-semibold dark:text-white">{invoiceData.vendor}</span> has been {canApproveInvoices ? 'approved and saved' : 'submitted for approval'}.
-            </p>
-          </div>
-          <DialogFooter>
-            <Button onClick={handleCloseConfirmation} className="w-full sm:w-auto bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark">
-              Back to Home
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Success dialog is no longer needed here as we now redirect to home directly */}
     </div>
   );
 };

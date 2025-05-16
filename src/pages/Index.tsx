@@ -1,100 +1,115 @@
 
-import React, { useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
-import { useAuth } from "@/contexts/AuthContext";
-import { Upload, Inbox, FileCheck } from "lucide-react";
-import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { CheckCircle } from "lucide-react";
 
-const Index: React.FC = () => {
-  const { accessConfig } = useAuth();
+interface SuccessMessage {
+  vendor: string;
+  action: 'submitted' | 'approved';
+}
+
+const Index = () => {
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<SuccessMessage | null>(null);
+  const navigate = useNavigate();
   
   useEffect(() => {
-    // Check if there's a success message from invoice submission
-    const successMessage = sessionStorage.getItem("invoiceSuccessMessage");
-    if (successMessage) {
+    // Check for success message in session storage
+    const messageJson = sessionStorage.getItem("invoiceSuccessMessage");
+    if (messageJson) {
       try {
-        const { vendor, action } = JSON.parse(successMessage);
-        toast.success(`Invoice for ${vendor} has been ${action} successfully!`);
-        // Remove the message after displaying it
+        const message = JSON.parse(messageJson) as SuccessMessage;
+        setSuccessMessage(message);
+        setShowSuccessDialog(true);
+        // Clear the message so it doesn't show again on refresh
         sessionStorage.removeItem("invoiceSuccessMessage");
       } catch (error) {
-        console.error("Error parsing success message:", error);
+        console.error("Failed to parse success message:", error);
       }
     }
   }, []);
-
+  
+  const handleProcessAnother = () => {
+    setShowSuccessDialog(false);
+    navigate("/upload");
+  };
+  
   return (
     <Layout>
-      <div className="w-full max-w-4xl mx-auto py-8">
-        <h1 className="text-3xl font-bold mb-2 text-center">Welcome to SmartInvoice AI</h1>
-        <p className="text-gray-600 mb-8 text-center dark:text-gray-300">
-          Easily manage, process, and approve invoices with the power of AI
-        </p>
+      <div className="w-full max-w-4xl mx-auto py-8 sm:py-12">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground tracking-tight">
+            Welcome to SmartInvoice AI
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Automate your invoice processing with powerful AI recognition
+          </p>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="hover:shadow-lg transition-shadow dark:bg-gray-800/80">
-            <CardContent className="pt-6">
-              <div className="text-center mb-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-full mx-auto flex items-center justify-center dark:bg-purple-900/30">
-                  <Upload className="h-6 w-6 text-smartinvoice-purple" />
-                </div>
-              </div>
-              <h2 className="text-xl font-semibold text-center mb-4 dark:text-white">Upload Invoice</h2>
-              <p className="text-gray-500 mb-6 text-center dark:text-gray-400">
-                Upload and process invoices instantly with our intelligent OCR system.
-              </p>
-              <div className="flex justify-center">
-                <Button asChild className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark">
-                  <Link to="/upload">Upload Invoice</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-card border border-border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow dark:bg-gray-800/50 dark:hover:bg-gray-800/70">
+            <h2 className="text-2xl font-semibold mb-3 dark:text-white">Upload &amp; Process</h2>
+            <p className="text-muted-foreground mb-4 dark:text-gray-300">
+              Upload your invoice and let our AI extract all important information automatically.
+            </p>
+            <Button 
+              onClick={() => navigate("/upload")}
+              className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark text-white"
+            >
+              Get Started
+            </Button>
+          </div>
 
-          <Card className="hover:shadow-lg transition-shadow dark:bg-gray-800/80">
-            <CardContent className="pt-6">
-              <div className="text-center mb-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-full mx-auto flex items-center justify-center dark:bg-purple-900/30">
-                  <Inbox className="h-6 w-6 text-smartinvoice-purple" />
-                </div>
-              </div>
-              <h2 className="text-xl font-semibold text-center mb-4 dark:text-white">My Requests</h2>
-              <p className="text-gray-500 mb-6 text-center dark:text-gray-400">
-                View all your submitted invoices and check their approval status.
-              </p>
-              <div className="flex justify-center">
-                <Button asChild variant="outline">
-                  <Link to="/requests">View Requests</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {accessConfig?.canApproveInvoices && (
-            <Card className="hover:shadow-lg transition-shadow dark:bg-gray-800/80">
-              <CardContent className="pt-6">
-                <div className="text-center mb-4">
-                  <div className="w-12 h-12 bg-purple-100 rounded-full mx-auto flex items-center justify-center dark:bg-purple-900/30">
-                    <FileCheck className="h-6 w-6 text-smartinvoice-purple" />
-                  </div>
-                </div>
-                <h2 className="text-xl font-semibold text-center mb-4 dark:text-white">Approve Invoices</h2>
-                <p className="text-gray-500 mb-6 text-center dark:text-gray-400">
-                  Review and approve pending invoices from your team members.
-                </p>
-                <div className="flex justify-center">
-                  <Button asChild variant="outline">
-                    <Link to="/approve">Approve Invoices</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          <div className="bg-card border border-border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow dark:bg-gray-800/50 dark:hover:bg-gray-800/70">
+            <h2 className="text-2xl font-semibold mb-3 dark:text-white">View Invoices</h2>
+            <p className="text-muted-foreground mb-4 dark:text-gray-300">
+              Check the status of your submitted and processed invoices.
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate("/requests")}
+              className="dark:text-white dark:border-gray-600 dark:hover:bg-gray-700"
+            >
+              View My Requests
+            </Button>
+          </div>
         </div>
       </div>
+
+      {/* Success dialog after submission */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md dark:bg-gray-800 dark:border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 dark:text-white">
+              <CheckCircle className="h-6 w-6 text-green-500" />
+              <span>Invoice {successMessage?.action === 'approved' ? 'Approved' : 'Submitted'} Successfully</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-300">
+              The invoice for <span className="font-semibold dark:text-white">{successMessage?.vendor || 'vendor'}</span> has been {successMessage?.action === 'approved' ? 'approved and saved' : 'submitted for approval'}.
+            </p>
+          </div>
+          <DialogFooter className="sm:justify-between">
+            <Button 
+              onClick={() => setShowSuccessDialog(false)} 
+              variant="outline"
+              className="dark:text-white dark:border-gray-600 dark:hover:bg-gray-700"
+            >
+              Close
+            </Button>
+            <Button 
+              onClick={handleProcessAnother} 
+              className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark"
+            >
+              Process Another Invoice
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
