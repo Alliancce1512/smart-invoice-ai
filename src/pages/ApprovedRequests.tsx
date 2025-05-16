@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import InvoiceList from "@/components/InvoiceList";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
+import { EmptyPlaceholder } from "@/components/EmptyPlaceholder";
+import { CheckCircle } from "lucide-react";
 
 const ApprovedRequests: React.FC = () => {
   const { userId, accessConfig } = useAuth();
@@ -45,10 +47,19 @@ const ApprovedRequests: React.FC = () => {
     <Layout>
       <div className="container mx-auto py-6">
         <h1 className="text-2xl font-semibold mb-6">Approved Invoices</h1>
-        <InvoiceList 
-          invoices={invoices} 
-          isLoading={isLoading} 
-        />
+        
+        {invoices.length === 0 && !isLoading ? (
+          <EmptyPlaceholder
+            icon={<CheckCircle className="h-12 w-12 text-muted-foreground" />}
+            title="No approved invoices"
+            description="There are no approved invoices yet."
+          />
+        ) : (
+          <InvoiceList 
+            invoices={invoices} 
+            isLoading={isLoading} 
+          />
+        )}
       </div>
     </Layout>
   );

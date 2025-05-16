@@ -6,6 +6,8 @@ import Layout from "@/components/Layout";
 import { toast } from "sonner";
 import InvoiceList from "@/components/InvoiceList";
 import { useAuth } from "@/contexts/AuthContext";
+import { EmptyPlaceholder } from "@/components/EmptyPlaceholder";
+import { FileX } from "lucide-react";
 
 const MyRequests: React.FC = () => {
   const { userId } = useAuth();
@@ -38,11 +40,24 @@ const MyRequests: React.FC = () => {
     <Layout>
       <div className="container mx-auto py-6">
         <h1 className="text-2xl font-semibold mb-6">My Submitted Invoices</h1>
-        <InvoiceList 
-          invoices={invoices} 
-          showApprovalStatus={true}
-          isLoading={isLoading} 
-        />
+        
+        {invoices.length === 0 && !isLoading ? (
+          <EmptyPlaceholder
+            icon={<FileX className="h-12 w-12 text-muted-foreground" />}
+            title="No invoices found"
+            description="You haven't submitted any invoices yet. Upload an invoice to get started."
+            action={{
+              label: "Upload Invoice",
+              href: "/upload"
+            }}
+          />
+        ) : (
+          <InvoiceList 
+            invoices={invoices} 
+            showApprovalStatus={true}
+            isLoading={isLoading} 
+          />
+        )}
       </div>
     </Layout>
   );
