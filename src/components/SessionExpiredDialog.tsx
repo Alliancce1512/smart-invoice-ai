@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ExclamationTriangleIcon } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 interface SessionExpiredDialogProps {
   isOpen: boolean;
@@ -32,7 +32,7 @@ export const SessionExpiredDialog: React.FC<SessionExpiredDialogProps> = ({ isOp
       <AlertDialogContent className="sm:max-w-md">
         <AlertDialogHeader>
           <div className="flex items-center gap-2 text-amber-500">
-            <ExclamationTriangleIcon className="h-5 w-5" />
+            <AlertTriangle className="h-5 w-5" />
             <AlertDialogTitle>Session Expired</AlertDialogTitle>
           </div>
           <AlertDialogDescription>
