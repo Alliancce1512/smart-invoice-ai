@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -55,7 +54,7 @@ const Index = () => {
         </div>
 
         {/* Quick action cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mx-auto justify-center">
           <Card className="group hover-scale border-border hover:border-smartinvoice-purple transition-all duration-300 dark:hover:border-smartinvoice-purple">
             <CardHeader className="flex flex-row items-center space-x-4 pb-2">
               <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center">
@@ -285,7 +284,7 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Success dialog after submission */}
+      {/* Success dialog after submission - with updated button order */}
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <DialogContent className="sm:max-w-md dark:bg-gray-800 dark:border-gray-700">
           <DialogHeader>

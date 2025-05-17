@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { CalendarIcon, DollarSignIcon, FileTextIcon, CheckIcon, XIcon } from "lucide-react";
@@ -46,11 +45,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({ invoices, showApprovalStatus 
   }
 
   if (!invoices || invoices.length === 0) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">No invoices found.</p>
-      </div>
-    );
+    return null; // Return null instead of rendering an empty table
   }
 
   return (
@@ -60,7 +55,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({ invoices, showApprovalStatus 
           <TableHeader>
             <TableRow>
               <TableHead>Vendor</TableHead>
-              <TableHead>Date</TableHead>
+              <TableHead>Invoice Date</TableHead>
               <TableHead>Amount</TableHead>
               <TableHead>Category</TableHead>
               {showApprovalStatus && <TableHead>Approval</TableHead>}
