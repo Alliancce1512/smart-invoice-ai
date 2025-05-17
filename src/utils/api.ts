@@ -187,13 +187,12 @@ export const getApprovedInvoices = async (username: string): Promise<any> => {
 // New function to get invoices for review
 export const getInvoicesForReview = async (username: string): Promise<any> => {
   try {
-    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/get-invoices-for-review", {
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/get-invoices-for-review", {
       method: "POST",
       headers: {
         ...getAuthHeaders(),
         "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username }),
+      }
     });
     
     return await handleApiResponse(response);
@@ -211,15 +210,14 @@ export const markInvoiceForApproval = async (invoiceId: number): Promise<any> =>
   try {
     const username = localStorage.getItem("smartinvoice_user_id") || "";
     
-    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/mark-invoice-for-approval", {
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/mark-invoice-for-approval", {
       method: "POST",
       headers: {
         ...getAuthHeaders(),
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        username,
-        invoiceId,
+        invoiceId
       }),
     });
     
@@ -254,7 +252,6 @@ export const declineInvoice = async (invoiceId: number, reason?: string): Promis
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        username,
         invoiceId,
         reason: reason || "",
       }),
