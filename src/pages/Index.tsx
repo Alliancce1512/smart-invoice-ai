@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -284,7 +285,7 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Success dialog after submission - with updated button order */}
+      {/* Success dialog after submission - with switched button order */}
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <DialogContent className="sm:max-w-md dark:bg-gray-800 dark:border-gray-700">
           <DialogHeader>
@@ -300,17 +301,17 @@ const Index = () => {
           </div>
           <DialogFooter className="sm:justify-between">
             <Button 
+              onClick={handleProcessAnother} 
+              className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark"
+            >
+              Process Another Invoice
+            </Button>
+            <Button 
               onClick={() => setShowSuccessDialog(false)} 
               variant="outline"
               className="dark:text-white dark:border-gray-600 dark:hover:bg-gray-700"
             >
               Close
-            </Button>
-            <Button 
-              onClick={handleProcessAnother} 
-              className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark"
-            >
-              Process Another Invoice
             </Button>
           </DialogFooter>
         </DialogContent>
