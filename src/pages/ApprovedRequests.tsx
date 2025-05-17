@@ -7,7 +7,8 @@ import { toast } from "sonner";
 import InvoiceList from "@/components/InvoiceList";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
-import { CheckCircle } from "lucide-react";
+import { RefreshCw, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const ApprovedRequests: React.FC = () => {
   const { userId, accessConfig } = useAuth();
@@ -50,13 +51,24 @@ const ApprovedRequests: React.FC = () => {
   return (
     <Layout>
       <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-semibold mb-6">Approved Invoices</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold">Approved Invoices</h1>
+          <Button 
+            variant="outline" 
+            onClick={handleRefresh}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
+        </div>
         
         <InvoiceList 
           invoices={invoices}
           showSubmittedBy={true} 
           isLoading={isLoading}
-          onRefresh={handleRefresh} 
+          onRefresh={handleRefresh}
+          showApprovalStatus={true}
         />
       </div>
     </Layout>

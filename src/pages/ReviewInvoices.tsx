@@ -114,7 +114,17 @@ const ReviewInvoices = () => {
   return (
     <Layout>
       <div className="container max-w-screen-xl mx-auto py-6">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-6">Review Invoices</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold">Review Invoices</h1>
+          <Button 
+            variant="outline" 
+            onClick={handleRefresh}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
+        </div>
         
         {isLoading ? (
           <div className="flex items-center justify-center h-40">
@@ -224,19 +234,6 @@ const ReviewInvoices = () => {
                 </PaginationContent>
               </Pagination>
             )}
-
-            {/* Refresh button */}
-            <div className="flex justify-end">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleRefresh}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <RefreshCw className="h-4 w-4 mr-1" />
-                Refresh
-              </Button>
-            </div>
           </div>
         )}
       </div>

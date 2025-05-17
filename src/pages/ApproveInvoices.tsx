@@ -2,14 +2,23 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Check, RefreshCw } from "lucide-react";
+import { Check, RefreshCw, FileText } from "lucide-react";
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { getInvoicesForApproval, approveInvoice } from "@/utils/api";
+import { EmptyPlaceholder } from "@/components/EmptyPlaceholder";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface Invoice {
   id: number;
@@ -24,9 +33,12 @@ interface Invoice {
   submittedAt: string;
 }
 
+const ITEMS_PER_PAGE = 10;
+
 const ApproveInvoices = () => {
   const { userId } = useAuth();
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   
   const fetchInvoices = async (): Promise<Invoice[]> => {
     if (!userId) {
@@ -57,17 +69,6 @@ const ApproveInvoices = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
-  };
-  
   const formatInvoiceDate = (dateString: string) => {
     try {
       // Try to parse the date
@@ -101,26 +102,33 @@ const ApproveInvoices = () => {
         maximumFractionDigits: 2,
       }).format(amount);
     } catch (error) {
-      console.error("Error formatting currency:", error, { amount, currency });
       // Fallback to basic formatting if Intl.NumberFormat fails
       return `${amount.toFixed(2)} ${currencyCode}`;
     }
   };
 
+  // Calculate pagination
+  const totalPages = Math.ceil(invoices.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedInvoices = invoices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleRefresh = () => {
+    refetch();
+    toast.info("Refreshing invoices...");
+  };
+
   return (
     <Layout>
-      <div className="w-full max-w-4xl mx-auto py-8 px-4 sm:px-0">
+      <div className="container mx-auto py-6">
         <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Approve Invoices</h1>
-            <p className="text-muted-foreground mt-1">
-              Review and approve pending invoices
-            </p>
-          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold">Approve Invoices</h1>
           <Button 
             variant="outline" 
-            onClick={() => refetch()} 
-            disabled={isLoading}
+            onClick={handleRefresh}
             className="flex items-center gap-2"
           >
             <RefreshCw className="h-4 w-4" />
@@ -129,22 +137,31 @@ const ApproveInvoices = () => {
         </div>
         
         {isLoading ? (
-          <div className="text-center py-8">
+          <div className="flex items-center justify-center p-8">
             <p className="text-muted-foreground">Loading invoices...</p>
           </div>
         ) : isError ? (
           <div className="text-center py-8">
             <p className="text-red-500">Error loading invoices. Please try again.</p>
+            <Button onClick={() => refetch()} className="mt-4">Retry</Button>
           </div>
-        ) : hasInvoices ? (
-          <Card>
-            <CardHeader className="pb-0">
-              <CardTitle>Pending Invoices</CardTitle>
-              <CardDescription>
-                You have {invoices.length} invoice{invoices.length !== 1 ? 's' : ''} waiting for approval
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
+        ) : !hasInvoices ? (
+          <EmptyPlaceholder
+            icon={<FileText className="h-12 w-12 text-muted-foreground" />}
+            title="No Pending Invoices"
+            description="There are currently no invoices waiting for your approval"
+            action={{
+              label: "Refresh",
+              href: "#",
+              onClick: (e) => {
+                e.preventDefault();
+                handleRefresh();
+              }
+            }}
+          />
+        ) : (
+          <div className="space-y-4">
+            <Card className="w-full overflow-hidden">
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -158,7 +175,7 @@ const ApproveInvoices = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {invoices.map((invoice) => (
+                    {paginatedInvoices.map((invoice) => (
                       <TableRow key={invoice.id || Math.random()}>
                         <TableCell className="font-medium">{invoice.vendor || 'N/A'}</TableCell>
                         <TableCell>{invoice.invoiceDate ? formatInvoiceDate(invoice.invoiceDate) : 'N/A'}</TableCell>
@@ -209,23 +226,41 @@ const ApproveInvoices = () => {
                   </TableBody>
                 </Table>
               </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>No Pending Invoices</CardTitle>
-              <CardDescription>
-                There are currently no invoices waiting for your approval
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                All invoices have been processed. Check back later for new submissions.
-              </p>
-            </CardContent>
-            {/* Removed the CardFooter with the duplicate Refresh button */}
-          </Card>
+            </Card>
+            
+            {/* Pagination controls */}
+            {totalPages > 1 && (
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        isActive={page === currentPage}
+                        onClick={() => handlePageChange(page)}
+                        className="cursor-pointer"
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </div>
         )}
       </div>
     </Layout>

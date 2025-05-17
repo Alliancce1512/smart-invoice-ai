@@ -285,21 +285,6 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
           </PaginationContent>
         </Pagination>
       )}
-
-      {/* Refresh button */}
-      {onRefresh && (
-        <div className="flex justify-end">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={onRefresh}
-            className="text-gray-600 hover:text-gray-800"
-          >
-            <RefreshCw className="h-4 w-4 mr-1" />
-            Refresh
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

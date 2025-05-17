@@ -6,8 +6,8 @@ import Layout from "@/components/Layout";
 import { toast } from "sonner";
 import InvoiceList from "@/components/InvoiceList";
 import { useAuth } from "@/contexts/AuthContext";
-import { EmptyPlaceholder } from "@/components/EmptyPlaceholder";
-import { FileX } from "lucide-react";
+import { RefreshCw, FileX } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const MyRequests: React.FC = () => {
   const { userId } = useAuth();
@@ -44,7 +44,17 @@ const MyRequests: React.FC = () => {
   return (
     <Layout>
       <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-semibold mb-6">My Submitted Invoices</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold">My Submitted Invoices</h1>
+          <Button 
+            variant="outline" 
+            onClick={handleRefresh}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
+        </div>
         
         <InvoiceList 
           invoices={invoices} 
