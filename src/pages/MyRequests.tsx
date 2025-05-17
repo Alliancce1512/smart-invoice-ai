@@ -12,7 +12,7 @@ import { FileX } from "lucide-react";
 const MyRequests: React.FC = () => {
   const { userId } = useAuth();
   
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["user-invoices", userId],
     queryFn: async () => {
       if (!userId) {

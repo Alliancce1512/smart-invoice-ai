@@ -1,9 +1,12 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { CalendarIcon, DollarSignIcon, FileTextIcon, CheckIcon, XIcon } from "lucide-react";
+import { CalendarIcon, DollarSignIcon, FileTextIcon, CheckIcon, XIcon, AlertTriangle, MessageSquare, ChevronDown, ChevronUp } from "lucide-react";
 import { format } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { cn } from "@/lib/utils";
 
 interface InvoiceListProps {
   invoices: any[];
@@ -30,13 +33,61 @@ const formatCurrency = (amount: string | number, currency: string = "USD") => {
 
 const formatDate = (dateString: string) => {
   try {
-    return format(new Date(dateString), "MMM dd, yyyy");
+    return format(new Date(dateString), "dd.MM.yyyy");
   } catch (error) {
     return dateString;
   }
 };
 
+const StatusBadge = ({ status }: { status: string }) => {
+  switch (status) {
+    case "for_review":
+      return (
+        <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-200">
+          <AlertTriangle className="w-3 h-3 mr-1" />
+          Awaiting Review
+        </Badge>
+      );
+    case "for_approval":
+      return (
+        <Badge variant="outline" className="bg-amber-100 text-amber-600 border-amber-200">
+          <AlertTriangle className="w-3 h-3 mr-1" />
+          Awaiting Approval
+        </Badge>
+      );
+    case "approved":
+      return (
+        <Badge variant="outline" className="bg-green-100 text-green-600 border-green-200">
+          <CheckIcon className="w-3 h-3 mr-1" />
+          Approved
+        </Badge>
+      );
+    case "declined":
+      return (
+        <Badge variant="outline" className="bg-red-100 text-red-600 border-red-200">
+          <XIcon className="w-3 h-3 mr-1" />
+          Declined
+        </Badge>
+      );
+    default:
+      return (
+        <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-200">
+          Unknown
+        </Badge>
+      );
+  }
+};
+
 const InvoiceList: React.FC<InvoiceListProps> = ({ invoices, showApprovalStatus = false, isLoading }) => {
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+  
+  const toggleRow = (id: string | number) => {
+    setExpandedRows((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+  
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -59,47 +110,94 @@ const InvoiceList: React.FC<InvoiceListProps> = ({ invoices, showApprovalStatus 
               <TableHead>Invoice Date</TableHead>
               <TableHead>Amount</TableHead>
               <TableHead>Category</TableHead>
-              {showApprovalStatus && <TableHead>Approval</TableHead>}
+              {showApprovalStatus && <TableHead>Status</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {invoices.map((invoice) => (
-              <TableRow key={invoice.id}>
-                <TableCell>
-                  <div className="flex items-center">
-                    <FileTextIcon className="w-4 h-4 mr-2 text-muted-foreground" />
-                    {invoice.vendor}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center">
-                    <CalendarIcon className="w-4 h-4 mr-2 text-muted-foreground" />
-                    {formatDate(invoice.invoiceDate)}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center">
-                    <DollarSignIcon className="w-4 h-4 mr-2 text-muted-foreground" />
-                    {formatCurrency(invoice.amount, invoice.currency)}
-                  </div>
-                </TableCell>
-                <TableCell>{invoice.category}</TableCell>
-                {showApprovalStatus && (
+              <React.Fragment key={invoice.id}>
+                <TableRow
+                  className={cn(
+                    "cursor-pointer",
+                    (invoice.review_comment || invoice.approval_comment) && "border-b-0"
+                  )}
+                  onClick={() => (invoice.review_comment || invoice.approval_comment) && toggleRow(invoice.id)}
+                >
                   <TableCell>
-                    {invoice.approved ? (
-                      <div className="flex items-center text-green-600">
-                        <CheckIcon className="w-4 h-4 mr-1" />
-                        Approved
-                      </div>
-                    ) : (
-                      <div className="flex items-center text-amber-600">
-                        <XIcon className="w-4 h-4 mr-1" />
-                        Pending
-                      </div>
-                    )}
+                    <div className="flex items-center">
+                      <FileTextIcon className="w-4 h-4 mr-2 text-muted-foreground" />
+                      {invoice.vendor}
+                    </div>
                   </TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      <CalendarIcon className="w-4 h-4 mr-2 text-muted-foreground" />
+                      {formatDate(invoice.invoiceDate)}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      <DollarSignIcon className="w-4 h-4 mr-2 text-muted-foreground" />
+                      {formatCurrency(invoice.amount, invoice.currency)}
+                    </div>
+                  </TableCell>
+                  <TableCell>{invoice.category}</TableCell>
+                  {showApprovalStatus && (
+                    <TableCell>
+                      <div className="flex items-center justify-between">
+                        <StatusBadge status={invoice.status || (invoice.approved ? "approved" : "for_approval")} />
+                        
+                        {(invoice.review_comment || invoice.approval_comment) && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleRow(invoice.id);
+                            }}
+                            className="ml-2 p-1 rounded-full hover:bg-gray-100"
+                          >
+                            {expandedRows[invoice.id] ? (
+                              <ChevronUp className="h-4 w-4 text-gray-500" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4 text-gray-500" />
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    </TableCell>
+                  )}
+                </TableRow>
+                
+                {(invoice.review_comment || invoice.approval_comment) && (
+                  <TableRow className="bg-gray-50">
+                    <TableCell colSpan={5} className="p-0">
+                      <Collapsible open={expandedRows[invoice.id]}>
+                        <CollapsibleContent>
+                          <div className="px-4 py-2 space-y-2">
+                            {invoice.review_comment && (
+                              <div className="flex items-start gap-2 text-sm">
+                                <MessageSquare className="h-4 w-4 text-gray-500 mt-0.5" />
+                                <div>
+                                  <span className="font-medium text-gray-700">Review Comment:</span>{" "}
+                                  <span className="text-gray-600">{invoice.review_comment}</span>
+                                </div>
+                              </div>
+                            )}
+                            {invoice.approval_comment && (
+                              <div className="flex items-start gap-2 text-sm">
+                                <MessageSquare className="h-4 w-4 text-gray-500 mt-0.5" />
+                                <div>
+                                  <span className="font-medium text-gray-700">Approval Comment:</span>{" "}
+                                  <span className="text-gray-600">{invoice.approval_comment}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </TableRow>
+              </React.Fragment>
             ))}
           </TableBody>
         </Table>
