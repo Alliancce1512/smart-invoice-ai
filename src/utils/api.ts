@@ -63,7 +63,7 @@ export const uploadInvoice = async (file: File, sessionId: string): Promise<any>
 
 export const submitInvoice = async (invoiceData: any, canApprove: boolean): Promise<any> => {
   try {
-    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/send-invoice", {
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/send-invoice", {
       method: "POST",
       headers: {
         ...getAuthHeaders(),
@@ -88,7 +88,7 @@ export const submitInvoice = async (invoiceData: any, canApprove: boolean): Prom
 
 export const getInvoicesForApproval = async (username: string): Promise<any> => {
   try {
-    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/get-invoices-for-approval", {
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/get-invoices-for-approval", {
       method: "POST",
       headers: {
         ...getAuthHeaders(),
@@ -111,7 +111,7 @@ export const approveInvoice = async (invoice: any): Promise<any> => {
   try {
     const username = localStorage.getItem("smartinvoice_user_id") || "";
     
-    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/approve-invoice", {
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/approve-invoice", {
       method: "POST",
       headers: {
         ...getAuthHeaders(),
@@ -144,7 +144,7 @@ export const approveInvoice = async (invoice: any): Promise<any> => {
 
 export const getUserInvoices = async (username: string): Promise<any> => {
   try {
-    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/get-user-invoices", {
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/get-user-invoices", {
       method: "POST",
       headers: {
         ...getAuthHeaders(),
@@ -165,7 +165,7 @@ export const getUserInvoices = async (username: string): Promise<any> => {
 
 export const getApprovedInvoices = async (username: string): Promise<any> => {
   try {
-    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/get-approved-invoices", {
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/get-approved-invoices", {
       method: "POST",
       headers: {
         ...getAuthHeaders(),
