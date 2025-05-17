@@ -15,8 +15,22 @@ import NotFound from "@/pages/NotFound";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { SessionExpiredDialog } from "@/components/SessionExpiredDialog";
+import { useAuth } from "@/contexts/AuthContext";
 
 const queryClient = new QueryClient();
+
+// Session manager component to handle the session expired dialog
+const SessionManager = ({ children }: { children: React.ReactNode }) => {
+  const { sessionExpired } = useAuth();
+  
+  return (
+    <>
+      {children}
+      <SessionExpiredDialog isOpen={sessionExpired} />
+    </>
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -26,58 +40,60 @@ const App = () => (
           <AuthProvider>
             <Toaster />
             <Sonner />
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route 
-                path="/" 
-                element={
-                  <ProtectedRoute>
-                    <Index />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/upload" 
-                element={
-                  <ProtectedRoute>
-                    <Upload />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/results" 
-                element={
-                  <ProtectedRoute>
-                    <Results />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/approve" 
-                element={
-                  <ProtectedRoute>
-                    <ApproveInvoices />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/requests" 
-                element={
-                  <ProtectedRoute>
-                    <MyRequests />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/approved" 
-                element={
-                  <ProtectedRoute>
-                    <ApprovedRequests />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <SessionManager>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route 
+                  path="/" 
+                  element={
+                    <ProtectedRoute>
+                      <Index />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/upload" 
+                  element={
+                    <ProtectedRoute>
+                      <Upload />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/results" 
+                  element={
+                    <ProtectedRoute>
+                      <Results />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/approve" 
+                  element={
+                    <ProtectedRoute>
+                      <ApproveInvoices />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/requests" 
+                  element={
+                    <ProtectedRoute>
+                      <MyRequests />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/approved" 
+                  element={
+                    <ProtectedRoute>
+                      <ApprovedRequests />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </SessionManager>
           </AuthProvider>
         </ThemeProvider>
       </BrowserRouter>

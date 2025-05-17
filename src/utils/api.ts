@@ -1,6 +1,14 @@
 
 import { toast } from "sonner";
 
+// Function to get the setSessionExpired function from the AuthContext
+// This avoids circular dependencies when importing from AuthContext directly
+let setSessionExpiredCallback: ((expired: boolean) => void) | null = null;
+
+export const registerSessionExpiredCallback = (callback: (expired: boolean) => void) => {
+  setSessionExpiredCallback = callback;
+};
+
 export const getAuthHeaders = (): HeadersInit => {
   const token = localStorage.getItem("smartinvoice_token");
   
@@ -11,10 +19,24 @@ export const getAuthHeaders = (): HeadersInit => {
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
-
-  console.log(token);
   
   return headers;
+};
+
+// Helper function to handle API responses and check for 403 errors
+const handleApiResponse = async (response: Response) => {
+  if (response.status === 403) {
+    if (setSessionExpiredCallback) {
+      setSessionExpiredCallback(true);
+    }
+    throw new Error("Session expired");
+  }
+  
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status}`);
+  }
+  
+  return await response.json();
 };
 
 export const uploadInvoice = async (file: File, sessionId: string): Promise<any> => {
@@ -29,14 +51,12 @@ export const uploadInvoice = async (file: File, sessionId: string): Promise<any>
       body: formData,
     });
     
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status}`);
-    }
-    
-    return await response.json();
+    return await handleApiResponse(response);
   } catch (error) {
     console.error("Upload error:", error);
-    toast.error("Failed to upload invoice. Please try again.");
+    if (!(error instanceof Error) || error.message !== "Session expired") {
+      toast.error("Failed to upload invoice. Please try again.");
+    }
     throw error;
   }
 };
@@ -56,14 +76,12 @@ export const submitInvoice = async (invoiceData: any, canApprove: boolean): Prom
       }),
     });
     
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status}`);
-    }
-    
-    return await response.json();
+    return await handleApiResponse(response);
   } catch (error) {
     console.error("Submit error:", error);
-    toast.error("Failed to submit invoice. Please try again.");
+    if (!(error instanceof Error) || error.message !== "Session expired") {
+      toast.error("Failed to submit invoice. Please try again.");
+    }
     throw error;
   }
 };
@@ -79,14 +97,12 @@ export const getInvoicesForApproval = async (username: string): Promise<any> => 
       body: JSON.stringify({ username }),
     });
     
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status}`);
-    }
-    
-    return await response.json();
+    return await handleApiResponse(response);
   } catch (error) {
     console.error("Failed to fetch invoices for approval:", error);
-    toast.error("Failed to load invoices for approval.");
+    if (!(error instanceof Error) || error.message !== "Session expired") {
+      toast.error("Failed to load invoices for approval.");
+    }
     throw error;
   }
 };
@@ -107,11 +123,7 @@ export const approveInvoice = async (invoice: any): Promise<any> => {
       }),
     });
     
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status}`);
-    }
-    
-    const result = await response.json();
+    const result = await handleApiResponse(response);
     
     if (result.status === 0) {
       toast.success("Invoice approved successfully.");
@@ -123,7 +135,9 @@ export const approveInvoice = async (invoice: any): Promise<any> => {
     return result;
   } catch (error) {
     console.error("Failed to approve invoice:", error);
-    toast.error("Failed to approve invoice. Please try again.");
+    if (!(error instanceof Error) || error.message !== "Session expired") {
+      toast.error("Failed to approve invoice. Please try again.");
+    }
     throw error;
   }
 };
@@ -139,14 +153,12 @@ export const getUserInvoices = async (username: string): Promise<any> => {
       body: JSON.stringify({ username }),
     });
     
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status}`);
-    }
-    
-    return await response.json();
+    return await handleApiResponse(response);
   } catch (error) {
     console.error("Failed to fetch user invoices:", error);
-    toast.error("Failed to load your submitted invoices.");
+    if (!(error instanceof Error) || error.message !== "Session expired") {
+      toast.error("Failed to load your submitted invoices.");
+    }
     throw error;
   }
 };
@@ -162,14 +174,12 @@ export const getApprovedInvoices = async (username: string): Promise<any> => {
       body: JSON.stringify({ username }),
     });
     
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status}`);
-    }
-    
-    return await response.json();
+    return await handleApiResponse(response);
   } catch (error) {
     console.error("Failed to fetch approved invoices:", error);
-    toast.error("Failed to load approved invoices.");
+    if (!(error instanceof Error) || error.message !== "Session expired") {
+      toast.error("Failed to load approved invoices.");
+    }
     throw error;
   }
 };

@@ -24,6 +24,8 @@ interface LoginResponse {
 interface AuthContextType extends AuthState {
   login: (username: string, password: string) => Promise<LoginResponse | undefined>;
   logout: () => void;
+  sessionExpired: boolean;
+  setSessionExpired: (expired: boolean) => void;
 }
 
 const initialAuthState: AuthState = {
@@ -54,6 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return initialAuthState;
   });
   
+  const [sessionExpired, setSessionExpired] = useState(false);
   const navigate = useNavigate();
   const { setTheme } = useTheme();
 
@@ -99,6 +102,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           },
         });
         
+        // Reset session expired state
+        setSessionExpired(false);
+        
         navigate("/");
       }
       
@@ -119,6 +125,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Clear session storage
     sessionStorage.clear();
     
+    // Reset session expired state
+    setSessionExpired(false);
+    
     // Navigate to login
     navigate("/login");
   };
@@ -129,6 +138,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...authState,
         login,
         logout,
+        sessionExpired,
+        setSessionExpired,
       }}
     >
       {children}
