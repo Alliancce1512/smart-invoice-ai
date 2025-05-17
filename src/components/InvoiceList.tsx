@@ -1,7 +1,6 @@
-
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { CalendarIcon, DollarSignIcon, FileTextIcon, CheckIcon, XIcon, AlertTriangle, MessageSquare, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import { CalendarIcon, DollarSignIcon, FileTextIcon, CheckIcon, XIcon, AlertTriangle, MessageSquare, ChevronDown, ChevronUp, FileX } from "lucide-react";
 import { format } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -120,7 +119,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
   if (!invoices || invoices.length === 0) {
     return (
       <EmptyPlaceholder
-        icon={<FileTextIcon className="h-12 w-12 text-muted-foreground" />}
+        icon={<FileX className="h-12 w-12 text-muted-foreground" />}
         title="No invoices to display"
         description="There are currently no invoices to display."
         action={onRefresh ? {

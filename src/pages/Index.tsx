@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -85,8 +84,8 @@ const Index = () => {
                 <FileText className="h-6 w-6 text-smartinvoice-purple" />
               </div>
               <div className="space-y-1">
-                <CardTitle>My Requests</CardTitle>
-                <CardDescription>Track your submissions</CardDescription>
+                <CardTitle>View Submissions</CardTitle>
+                <CardDescription>Track your invoices</CardDescription>
               </div>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
@@ -98,7 +97,7 @@ const Index = () => {
                 className="w-full bg-card hover:bg-muted text-foreground border border-input"
                 variant="outline"
               >
-                View Requests
+                View Invoices
               </Button>
             </CardFooter>
           </Card>
@@ -110,8 +109,8 @@ const Index = () => {
                   <FileCheck className="h-6 w-6 text-smartinvoice-purple" />
                 </div>
                 <div className="space-y-1">
-                  <CardTitle>Review Invoices</CardTitle>
-                  <CardDescription>Manage approval requests</CardDescription>
+                  <CardTitle>Start Reviewing</CardTitle>
+                  <CardDescription>Manage invoice approvals</CardDescription>
                 </div>
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">

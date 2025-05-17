@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import InvoiceList from "@/components/InvoiceList";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
-import { RefreshCw, CheckCircle } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const ApprovedRequests: React.FC = () => {

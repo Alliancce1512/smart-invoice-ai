@@ -6,7 +6,7 @@ import Layout from "@/components/Layout";
 import { toast } from "sonner";
 import InvoiceList from "@/components/InvoiceList";
 import { useAuth } from "@/contexts/AuthContext";
-import { RefreshCw, FileX } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const MyRequests: React.FC = () => {
