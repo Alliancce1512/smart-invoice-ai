@@ -1,10 +1,10 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@/contexts/ThemeContext";
 
 interface AccessConfig {
   canApproveInvoices: boolean;
+  canReviewInvoices: boolean;
 }
 
 interface AuthState {
@@ -99,6 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           userId: data.userId || username, // Store userId or fallback to username
           accessConfig: {
             canApproveInvoices: data.accessConfig?.canApproveInvoices || false,
+            canReviewInvoices: data.accessConfig?.canReviewInvoices || false,
           },
         });
         
