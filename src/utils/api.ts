@@ -88,7 +88,7 @@ export const submitInvoice = async (invoiceData: any, canApprove: boolean): Prom
 
 export const getInvoicesForApproval = async (username: string): Promise<any> => {
   try {
-    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/get-invoices-for-approval", {
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/get-invoices-for-approval", {
       method: "POST",
       headers: {
         ...getAuthHeaders(),
