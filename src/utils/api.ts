@@ -183,3 +183,98 @@ export const getApprovedInvoices = async (username: string): Promise<any> => {
     throw error;
   }
 };
+
+// New function to get invoices for review
+export const getInvoicesForReview = async (username: string): Promise<any> => {
+  try {
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/get-invoices-for-review", {
+      method: "POST",
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username }),
+    });
+    
+    return await handleApiResponse(response);
+  } catch (error) {
+    console.error("Failed to fetch invoices for review:", error);
+    if (!(error instanceof Error) || error.message !== "Session expired") {
+      toast.error("Failed to load invoices for review.");
+    }
+    throw error;
+  }
+};
+
+// Function to mark invoice for approval
+export const markInvoiceForApproval = async (invoiceId: number): Promise<any> => {
+  try {
+    const username = localStorage.getItem("smartinvoice_user_id") || "";
+    
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/mark-invoice-for-approval", {
+      method: "POST",
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username,
+        invoiceId,
+      }),
+    });
+    
+    const result = await handleApiResponse(response);
+    
+    if (result.status === 0) {
+      toast.success("Invoice sent for approval successfully.");
+    } else {
+      toast.error("Failed to send invoice for approval.");
+      throw new Error("Failed to send invoice for approval");
+    }
+    
+    return result;
+  } catch (error) {
+    console.error("Failed to mark invoice for approval:", error);
+    if (!(error instanceof Error) || error.message !== "Session expired") {
+      toast.error("Failed to send invoice for approval. Please try again.");
+    }
+    throw error;
+  }
+};
+
+// Function to decline invoice
+export const declineInvoice = async (invoiceId: number, reason?: string): Promise<any> => {
+  try {
+    const username = localStorage.getItem("smartinvoice_user_id") || "";
+    
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/decline-invoice", {
+      method: "POST",
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username,
+        invoiceId,
+        reason: reason || "",
+      }),
+    });
+    
+    const result = await handleApiResponse(response);
+    
+    if (result.status === 0) {
+      toast.success("Invoice declined successfully.");
+    } else {
+      toast.error("Failed to decline invoice.");
+      throw new Error("Failed to decline invoice");
+    }
+    
+    return result;
+  } catch (error) {
+    console.error("Failed to decline invoice:", error);
+    if (!(error instanceof Error) || error.message !== "Session expired") {
+      toast.error("Failed to decline invoice. Please try again.");
+    }
+    throw error;
+  }
+};

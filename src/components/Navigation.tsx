@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Moon, Sun, Inbox, Users, Home, Upload, FileCheck, Menu, X, FileText } from "lucide-react";
+import { Moon, Sun, Inbox, Users, Home, Upload, FileCheck, Menu, X, FileText, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Navigation: React.FC = () => {
@@ -40,6 +40,16 @@ const Navigation: React.FC = () => {
       active: location.pathname === "/requests"
     }
   ];
+
+  // Add Review Invoices tab for users with canReviewInvoices permission (role 1 or 3)
+  if (accessConfig?.canReviewInvoices) {
+    navItems.push({
+      to: "/review",
+      label: "Review Invoices",
+      icon: <ClipboardCheck className="w-4 h-4 mr-1" />,
+      active: location.pathname === "/review"
+    });
+  }
 
   // Admin-only navigation items
   if (accessConfig?.canApproveInvoices) {

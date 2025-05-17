@@ -11,6 +11,7 @@ import Login from "@/pages/Login";
 import MyRequests from "@/pages/MyRequests";
 import ApprovedRequests from "@/pages/ApprovedRequests";
 import ApproveInvoices from "@/pages/ApproveInvoices";
+import ReviewInvoices from "@/pages/ReviewInvoices";
 import NotFound from "@/pages/NotFound";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -72,6 +73,14 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <ApproveInvoices />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/review" 
+                  element={
+                    <ProtectedRoute>
+                      <ReviewInvoices />
                     </ProtectedRoute>
                   } 
                 />
