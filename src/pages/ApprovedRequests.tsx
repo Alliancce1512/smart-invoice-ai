@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import InvoiceList from "@/components/InvoiceList";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
-import { EmptyPlaceholder } from "@/components/EmptyPlaceholder";
 import { CheckCircle } from "lucide-react";
 
 const ApprovedRequests: React.FC = () => {
@@ -19,7 +18,7 @@ const ApprovedRequests: React.FC = () => {
     return <Navigate to="/" />;
   }
   
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["approved-invoices", userId],
     queryFn: async () => {
       if (!userId) {
@@ -43,23 +42,22 @@ const ApprovedRequests: React.FC = () => {
 
   const invoices = data?.invoices || [];
 
+  const handleRefresh = () => {
+    refetch();
+    toast.info("Refreshing approved invoices...");
+  };
+
   return (
     <Layout>
       <div className="container mx-auto py-6">
         <h1 className="text-2xl font-semibold mb-6">Approved Invoices</h1>
         
-        {invoices.length === 0 && !isLoading ? (
-          <EmptyPlaceholder
-            icon={<CheckCircle className="h-12 w-12 text-muted-foreground" />}
-            title="No approved invoices"
-            description="There are no approved invoices yet."
-          />
-        ) : (
-          <InvoiceList 
-            invoices={invoices} 
-            isLoading={isLoading} 
-          />
-        )}
+        <InvoiceList 
+          invoices={invoices}
+          showSubmittedBy={true} 
+          isLoading={isLoading}
+          onRefresh={handleRefresh} 
+        />
       </div>
     </Layout>
   );

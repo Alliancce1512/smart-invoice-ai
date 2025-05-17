@@ -11,7 +11,7 @@ interface EmptyPlaceholderProps {
   action?: {
     label: string;
     href: string;
-    onClick?: () => void;
+    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   };
 }
 
@@ -27,14 +27,22 @@ export function EmptyPlaceholder({
       <h3 className="mb-2 text-xl font-semibold">{title}</h3>
       <p className="mb-6 max-w-sm text-center text-muted-foreground">{description}</p>
       {action && (
-        <Link to={action.href}>
+        action.onClick ? (
           <Button
             onClick={action.onClick}
             className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark"
           >
             {action.label}
           </Button>
-        </Link>
+        ) : (
+          <Link to={action.href}>
+            <Button
+              className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark"
+            >
+              {action.label}
+            </Button>
+          </Link>
+        )
       )}
     </div>
   );

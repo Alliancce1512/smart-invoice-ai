@@ -36,28 +36,22 @@ const MyRequests: React.FC = () => {
 
   const invoices = data?.invoices || [];
 
+  const handleRefresh = () => {
+    refetch();
+    toast.info("Refreshing invoices...");
+  };
+
   return (
     <Layout>
       <div className="container mx-auto py-6">
         <h1 className="text-2xl font-semibold mb-6">My Submitted Invoices</h1>
         
-        {invoices.length === 0 && !isLoading ? (
-          <EmptyPlaceholder
-            icon={<FileX className="h-12 w-12 text-muted-foreground" />}
-            title="No invoices found"
-            description="You haven't submitted any invoices yet. Upload an invoice to get started."
-            action={{
-              label: "Upload Invoice",
-              href: "/upload"
-            }}
-          />
-        ) : (
-          <InvoiceList 
-            invoices={invoices} 
-            showApprovalStatus={true}
-            isLoading={isLoading} 
-          />
-        )}
+        <InvoiceList 
+          invoices={invoices} 
+          showApprovalStatus={true}
+          isLoading={isLoading}
+          onRefresh={handleRefresh}
+        />
       </div>
     </Layout>
   );
