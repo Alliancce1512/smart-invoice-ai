@@ -245,7 +245,7 @@ export const declineInvoice = async (invoiceId: number, reason?: string): Promis
   try {
     const username = localStorage.getItem("smartinvoice_user_id") || "";
     
-    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook-test/smartinvoice/decline-invoice", {
+    const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/decline-invoice", {
       method: "POST",
       headers: {
         ...getAuthHeaders(),
