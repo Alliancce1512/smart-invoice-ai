@@ -45,7 +45,7 @@ const MyRequests: React.FC = () => {
     <Layout>
       <div className="container mx-auto py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold">My Submitted Invoices</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">My Requests</h1>
           <Button 
             variant="outline" 
             onClick={handleRefresh}
