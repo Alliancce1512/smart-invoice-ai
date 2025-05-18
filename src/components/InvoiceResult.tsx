@@ -51,7 +51,6 @@ const InvoiceResult = () => {
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
   const { accessConfig } = useAuth();
-  const canApproveInvoices = accessConfig?.canApproveInvoices || false;
 
   useEffect(() => {
     // Get stored data from the upload process
@@ -132,7 +131,7 @@ const InvoiceResult = () => {
   };
 
   const handleSubmitInvoice = async () => {
-    if (!editedInvoiceData) return;
+    if (!invoiceData) return;
     
     setIsSubmitting(true);
     
@@ -140,24 +139,30 @@ const InvoiceResult = () => {
       // Prepare the invoice data for submission, ensuring date is in dd.MM.yyyy format
       const formattedDate = formatDate(getInvoiceDate());
       
+      // Determine if the invoice was edited by comparing original and edited data
+      const wasEdited = isEditing && JSON.stringify(invoiceData) !== JSON.stringify(editedInvoiceData);
+      
+      // Use the appropriate data source depending on edit state
+      const dataToSubmit = isEditing ? editedInvoiceData : invoiceData;
+      
       const submitData = {
-        vendor: editedInvoiceData.vendor,
+        vendor: dataToSubmit!.vendor,
         invoiceDate: formattedDate,
-        amount: editedInvoiceData.amount,
-        currency: editedInvoiceData.currency,
-        iban: editedInvoiceData.iban || "",
-        category: editedInvoiceData.category || "Other",
-        edited: JSON.stringify(invoiceData) !== JSON.stringify(editedInvoiceData)
+        amount: dataToSubmit!.amount,
+        currency: dataToSubmit!.currency,
+        iban: dataToSubmit!.iban || "",
+        category: dataToSubmit!.category || "Other",
+        edited: wasEdited
       };
 
       // Submit the invoice
-      const response = await submitInvoice(submitData, canApproveInvoices);
+      const response = await submitInvoice(submitData);
       
       if (response.status === 0) {
         // Store success message to show on the home page
         sessionStorage.setItem("invoiceSuccessMessage", JSON.stringify({
-          vendor: editedInvoiceData.vendor,
-          action: canApproveInvoices ? 'approved' : 'submitted'
+          vendor: dataToSubmit!.vendor,
+          action: 'submitted'
         }));
         
         // Navigate to home after successful submission
@@ -174,6 +179,10 @@ const InvoiceResult = () => {
   };
 
   const handleEditToggle = () => {
+    if (isEditing) {
+      // Reset edited data when canceling edit mode
+      setEditedInvoiceData({...invoiceData!});
+    }
     setIsEditing(!isEditing);
   };
 
@@ -192,10 +201,19 @@ const InvoiceResult = () => {
 
   return (
     <div className="w-full max-w-3xl mx-auto animate-scale-in">
-      <Card className="card-shadow dark:bg-gray-800/80 dark:border-gray-700">
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className="card-shadow dark:bg-gray-800/80 dark:border-gray-700 shadow-lg">
+        <CardHeader className="flex flex-row items-center justify-between bg-gray-50 dark:bg-gray-800 rounded-t-lg border-b dark:border-gray-700">
           <CardTitle className="text-xl font-semibold dark:text-white">Invoice Details</CardTitle>
           <div className="flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleEditToggle}
+              className="flex items-center gap-2"
+            >
+              <Edit className="h-4 w-4" />
+              {isEditing ? "Cancel Editing" : "Edit"}
+            </Button>
             <Button 
               variant="outline" 
               size="sm" 
@@ -206,28 +224,16 @@ const InvoiceResult = () => {
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           {showJson ? (
             <div className="bg-gray-50 p-4 rounded-md overflow-auto max-h-96 dark:bg-gray-900 dark:text-gray-200">
               <pre className="text-xs text-gray-800 dark:text-gray-200">{JSON.stringify(isEditing ? editedInvoiceData : invoiceData, null, 2)}</pre>
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="flex justify-end mb-4">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleEditToggle}
-                  className="flex items-center gap-2"
-                >
-                  <Edit className="h-4 w-4" />
-                  {isEditing ? "Cancel Editing" : "Edit"}
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="vendor" className="text-gray-500 dark:text-gray-300">Vendor Name</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="vendor" className="text-gray-500 dark:text-gray-300 text-sm font-medium">Vendor Name</Label>
                   {isEditing ? (
                     <Input 
                       id="vendor"
@@ -236,11 +242,11 @@ const InvoiceResult = () => {
                       className="mt-1"
                     />
                   ) : (
-                    <div id="vendor" className="font-medium text-lg mt-1 dark:text-white">{invoiceData.vendor || "N/A"}</div>
+                    <div id="vendor" className="font-medium text-lg mt-1 dark:text-white py-2 px-3 bg-gray-50 rounded-md dark:bg-gray-700/50">{invoiceData.vendor || "N/A"}</div>
                   )}
                 </div>
-                <div>
-                  <Label htmlFor="amount" className="text-gray-500 dark:text-gray-300">Amount</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="amount" className="text-gray-500 dark:text-gray-300 text-sm font-medium">Amount</Label>
                   {isEditing ? (
                     <div className="flex gap-2 mt-1">
                       <Input 
@@ -266,13 +272,13 @@ const InvoiceResult = () => {
                       </Select>
                     </div>
                   ) : (
-                    <div id="amount" className="font-medium text-lg mt-1 dark:text-white">
+                    <div id="amount" className="font-medium text-lg mt-1 dark:text-white py-2 px-3 bg-gray-50 rounded-md dark:bg-gray-700/50">
                       {formatCurrency(invoiceData.amount, invoiceData.currency)}
                     </div>
                   )}
                 </div>
-                <div>
-                  <Label htmlFor="date" className="text-gray-500 dark:text-gray-300">Invoice Date</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="date" className="text-gray-500 dark:text-gray-300 text-sm font-medium">Invoice Date</Label>
                   {isEditing ? (
                     <Input 
                       id="date"
@@ -282,11 +288,11 @@ const InvoiceResult = () => {
                       className="mt-1"
                     />
                   ) : (
-                    <div id="date" className="font-medium mt-1 dark:text-white">{formatDate(getInvoiceDate())}</div>
+                    <div id="date" className="font-medium mt-1 dark:text-white py-2 px-3 bg-gray-50 rounded-md dark:bg-gray-700/50">{formatDate(getInvoiceDate())}</div>
                   )}
                 </div>
-                <div>
-                  <Label htmlFor="iban" className="text-gray-500 dark:text-gray-300">IBAN</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="iban" className="text-gray-500 dark:text-gray-300 text-sm font-medium">IBAN</Label>
                   {isEditing ? (
                     <Input 
                       id="iban"
@@ -295,13 +301,13 @@ const InvoiceResult = () => {
                       className="mt-1"
                     />
                   ) : (
-                    <div id="iban" className="font-medium mt-1 dark:text-white">{invoiceData.iban || "N/A"}</div>
+                    <div id="iban" className="font-medium mt-1 dark:text-white py-2 px-3 bg-gray-50 rounded-md dark:bg-gray-700/50">{invoiceData.iban || "N/A"}</div>
                   )}
                 </div>
               </div>
 
-              <div className="pt-4">
-                <Label htmlFor="category" className="text-gray-500 dark:text-gray-300 block mb-1">Expense Category</Label>
+              <div className="pt-4 space-y-2">
+                <Label htmlFor="category" className="text-gray-500 dark:text-gray-300 text-sm font-medium block mb-1">Expense Category</Label>
                 {isEditing ? (
                   <Select
                     value={editedInvoiceData?.category || "Other"}
@@ -319,13 +325,13 @@ const InvoiceResult = () => {
                     </SelectContent>
                   </Select>
                 ) : (
-                  <div id="category" className="font-medium px-3 py-2 border border-gray-200 rounded bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600">
+                  <div id="category" className="font-medium px-3 py-2 bg-gray-50 rounded-md dark:bg-gray-700/50 dark:text-white">
                     {invoiceData.category || "Other"}
                   </div>
                 )}
               </div>
 
-              <div className="flex justify-end space-x-3 pt-4">
+              <div className="flex justify-end space-x-3 pt-6 mt-2">
                 <Button 
                   className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark"
                   disabled={isSubmitting}
@@ -338,8 +344,6 @@ const InvoiceResult = () => {
           )}
         </CardContent>
       </Card>
-
-      {/* Success dialog is no longer needed here as we now redirect to home directly */}
     </div>
   );
 };
