@@ -211,7 +211,7 @@ const InvoiceResult = () => {
               onClick={handleEditToggle}
               className="flex items-center gap-2"
             >
-              <Edit className="h-4 w-4" />
+              <Edit size={16} />
               {isEditing ? "Cancel Editing" : "Edit"}
             </Button>
             <Button 
