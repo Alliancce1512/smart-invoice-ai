@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { CalendarIcon, DollarSignIcon, FileTextIcon, CheckIcon, XIcon, AlertTriangle, MessageSquare, ChevronDown, ChevronUp, FileX } from "lucide-react";
 import { format } from "date-fns";
@@ -104,6 +104,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(null);
+  const [newExpandedRows, setNewExpandedRows] = useState<Record<string, boolean>>({});
   
   const toggleRow = (id: string | number) => {
     setExpandedRows((prev) => ({
@@ -183,16 +184,19 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
     setExpandedRows({});
   };
 
-  // Auto-expand rows with comments when they are in declined status
-  React.useEffect(() => {
-    const newExpandedRows: Record<string, boolean> = {};
-    paginatedInvoices.forEach(invoice => {
-      if ((invoice.status === "declined" || invoice.approved === false) && 
-          (invoice.review_comment || invoice.approval_comment)) {
-        newExpandedRows[invoice.id] = true;
-      }
-    });
-    setExpandedRows(prev => ({...prev, ...newExpandedRows}));
+  // FIX: Move the useEffect hook outside of conditional rendering
+  useEffect(() => {
+    // Only update expanded rows if there are invoices to process
+    if (paginatedInvoices && paginatedInvoices.length > 0) {
+      const rowsToExpand: Record<string, boolean> = {};
+      paginatedInvoices.forEach(invoice => {
+        if ((invoice.status === "declined" || invoice.approved === false) && 
+            (invoice.review_comment || invoice.approval_comment)) {
+          rowsToExpand[invoice.id] = true;
+        }
+      });
+      setExpandedRows(prev => ({...prev, ...rowsToExpand}));
+    }
   }, [paginatedInvoices, currentPage]);
 
   return (
