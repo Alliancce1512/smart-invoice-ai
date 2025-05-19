@@ -104,7 +104,6 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(null);
-  const [newExpandedRows, setNewExpandedRows] = useState<Record<string, boolean>>({});
   
   const toggleRow = (id: string | number) => {
     setExpandedRows((prev) => ({
@@ -126,27 +125,55 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
   };
   
   // Apply sorting to data
-  const sortedInvoices = [...invoices];
-  if (sortColumn && sortDirection) {
-    sortedInvoices.sort((a, b) => {
-      let valA = a[sortColumn];
-      let valB = b[sortColumn];
-      
-      // Handle special cases like dates and amounts
-      if (sortColumn === "invoiceDate") {
-        valA = new Date(valA).getTime();
-        valB = new Date(valB).getTime();
-      } else if (sortColumn === "amount") {
-        valA = parseFloat(valA) || 0;
-        valB = parseFloat(valB) || 0;
-      }
-      
-      if (valA < valB) return sortDirection === "asc" ? -1 : 1;
-      if (valA > valB) return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    });
-  }
+  const sortedInvoices = React.useMemo(() => {
+    const result = [...invoices];
+    if (sortColumn && sortDirection) {
+      result.sort((a, b) => {
+        let valA = a[sortColumn];
+        let valB = b[sortColumn];
+        
+        // Handle special cases like dates and amounts
+        if (sortColumn === "invoiceDate") {
+          valA = new Date(valA).getTime();
+          valB = new Date(valB).getTime();
+        } else if (sortColumn === "amount") {
+          valA = parseFloat(valA) || 0;
+          valB = parseFloat(valB) || 0;
+        }
+        
+        if (valA < valB) return sortDirection === "asc" ? -1 : 1;
+        if (valA > valB) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return result;
+  }, [invoices, sortColumn, sortDirection]);
   
+  // Calculate pagination
+  const totalPages = Math.ceil(sortedInvoices.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedInvoices = sortedInvoices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Reset expanded rows when changing pages
+    setExpandedRows({});
+  };
+
+  // This useEffect hook will always run, not conditionally
+  useEffect(() => {
+    if (!paginatedInvoices || paginatedInvoices.length === 0) return;
+    
+    const newExpandedRows: Record<string, boolean> = {};
+    paginatedInvoices.forEach(invoice => {
+      if ((invoice.status === "declined" || invoice.approved === false) && 
+          (invoice.review_comment || invoice.approval_comment)) {
+        newExpandedRows[invoice.id] = true;
+      }
+    });
+    setExpandedRows(prev => ({...prev, ...newExpandedRows}));
+  }, [paginatedInvoices, currentPage]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -172,32 +199,6 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
       />
     );
   }
-
-  // Calculate pagination
-  const totalPages = Math.ceil(sortedInvoices.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedInvoices = sortedInvoices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    // Reset expanded rows when changing pages
-    setExpandedRows({});
-  };
-
-  // FIX: Move the useEffect hook outside of conditional rendering
-  useEffect(() => {
-    // Only update expanded rows if there are invoices to process
-    if (paginatedInvoices && paginatedInvoices.length > 0) {
-      const rowsToExpand: Record<string, boolean> = {};
-      paginatedInvoices.forEach(invoice => {
-        if ((invoice.status === "declined" || invoice.approved === false) && 
-            (invoice.review_comment || invoice.approval_comment)) {
-          rowsToExpand[invoice.id] = true;
-        }
-      });
-      setExpandedRows(prev => ({...prev, ...rowsToExpand}));
-    }
-  }, [paginatedInvoices, currentPage]);
 
   return (
     <div className="space-y-4">

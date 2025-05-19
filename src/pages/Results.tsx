@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import InvoiceResult from "@/components/InvoiceResult";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 const Results = () => {
   const [invoices, setInvoices] = useState([]);

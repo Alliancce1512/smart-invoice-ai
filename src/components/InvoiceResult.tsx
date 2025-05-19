@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { CalendarIcon, DollarSignIcon, FileTextIcon, CheckIcon, XIcon, AlertTriangle, MessageSquare, ChevronDown, ChevronUp, FileX } from "lucide-react";
@@ -124,27 +125,55 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
   };
   
   // Apply sorting to data
-  const sortedInvoices = [...invoices];
-  if (sortColumn && sortDirection) {
-    sortedInvoices.sort((a, b) => {
-      let valA = a[sortColumn];
-      let valB = b[sortColumn];
-      
-      // Handle special cases like dates and amounts
-      if (sortColumn === "invoiceDate") {
-        valA = new Date(valA).getTime();
-        valB = new Date(valB).getTime();
-      } else if (sortColumn === "amount") {
-        valA = parseFloat(valA) || 0;
-        valB = parseFloat(valB) || 0;
-      }
-      
-      if (valA < valB) return sortDirection === "asc" ? -1 : 1;
-      if (valA > valB) return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    });
-  }
+  const sortedInvoices = React.useMemo(() => {
+    const result = [...invoices];
+    if (sortColumn && sortDirection) {
+      result.sort((a, b) => {
+        let valA = a[sortColumn];
+        let valB = b[sortColumn];
+        
+        // Handle special cases like dates and amounts
+        if (sortColumn === "invoiceDate") {
+          valA = new Date(valA).getTime();
+          valB = new Date(valB).getTime();
+        } else if (sortColumn === "amount") {
+          valA = parseFloat(valA) || 0;
+          valB = parseFloat(valB) || 0;
+        }
+        
+        if (valA < valB) return sortDirection === "asc" ? -1 : 1;
+        if (valA > valB) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return result;
+  }, [invoices, sortColumn, sortDirection]);
   
+  // Calculate pagination
+  const totalPages = Math.ceil(sortedInvoices.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedInvoices = sortedInvoices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Reset expanded rows when changing pages
+    setExpandedRows({});
+  };
+
+  // Make sure hooks are always called in the same order
+  useEffect(() => {
+    if (!paginatedInvoices || paginatedInvoices.length === 0) return;
+    
+    const newExpandedRows: Record<string, boolean> = {};
+    paginatedInvoices.forEach(invoice => {
+      if ((invoice.status === "declined" || invoice.approved === false) && 
+          (invoice.review_comment || invoice.approval_comment)) {
+        newExpandedRows[invoice.id] = true;
+      }
+    });
+    setExpandedRows(prev => ({...prev, ...newExpandedRows}));
+  }, [paginatedInvoices, currentPage]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -170,29 +199,6 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
       />
     );
   }
-
-  // Calculate pagination
-  const totalPages = Math.ceil(sortedInvoices.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedInvoices = sortedInvoices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    // Reset expanded rows when changing pages
-    setExpandedRows({});
-  };
-
-  // Auto-expand rows with comments when they are in declined status
-  useEffect(() => {
-    const newExpandedRows: Record<string, boolean> = {};
-    paginatedInvoices.forEach(invoice => {
-      if ((invoice.status === "declined" || invoice.approved === false) && 
-          (invoice.review_comment || invoice.approval_comment)) {
-        newExpandedRows[invoice.id] = true;
-      }
-    });
-    setExpandedRows(prev => ({...prev, ...newExpandedRows}));
-  }, [paginatedInvoices, currentPage]);
 
   return (
     <div className="space-y-4">
