@@ -1,73 +1,65 @@
-# Welcome to your Lovable project
+# 🧾 SmartInvoice AI
 
-## Project info
+SmartInvoice AI is an AI-powered invoice processing platform that enables companies to streamline invoice submissions, reviews, and approvals.
 
-**URL**: https://lovable.dev/projects/010dae20-602b-4a46-a35f-27047dd3672e
+**Live App**: [invoice-ai.presiyangeorgiev.eu](https://invoice-ai.presiyangeorgiev.eu)
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 🚀 Features
 
-**Use Lovable**
+- ✅ **AI Invoice Extraction** — Automatically extracts relevant fields (vendor, amount, IBAN, date, etc.) from PDF invoices using OCR and LLM.
+- 🧠 **Intelligent Categorization** — Classifies invoices into predefined categories like "Cloud Services", "Travel", "Legal & Accounting", etc.
+- 🔒 **JWT Authentication** — Role-based login (Employee / Reviewer / Approver) using secure JSON Web Tokens.
+- 🧑‍💼 **Role Management** — Access and actions are restricted based on user roles:
+  - **Employee** – Upload invoices
+  - **Reviewer** – Review and forward invoices for approval
+  - **Approver** – Final approval/rejection
+- ✍️ **Edit Invoice Data** — Users can manually review/edit extracted data before submission.
+- 💬 **Comments** — Reviewers and approvers can leave comments during their stages.
+- 📊 **Dashboard** — Role-specific tabs (My Requests, Review Invoices, Approve Invoices, Approved Requests).
+- 📤 **Multi-Step Invoice Flow** — Invoice goes through `For Review → For Approval → Approved / Declined`
+- 📱 **Responsive UI** — Clean and responsive design optimized for both desktop and mobile.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/010dae20-602b-4a46-a35f-27047dd3672e) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 👤 Demo Accounts
 
-**Use your preferred IDE**
+Use the following accounts to explore the platform:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+| Role              |  Username  |  Password  |
+|-------------------|------------|------------|
+| Standard Employee | `user`     | `admin123` |
+| Reviewer          | `reviewer` | `admin123` |
+| Approver          | `approver` | `admin123` |
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## 🛠 Tech Stack
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+| Layer      | Technology                     |
+|------------|--------------------------------|
+| Frontend   | [Vite](https://vitejs.dev/), [React](https://reactjs.org/), [Tailwind CSS](https://tailwindcss.com/), [ShadCN UI](https://ui.shadcn.com/) |
+| Backend    | [n8n](https://n8n.io/) — No-code backend logic with PostgreSQL integration |
+| AI Agent   | [Lovable.dev](https://lovable.dev/) — LLM prompt-based frontend logic |
+| Database   | [PostgreSQL](https://www.postgresql.org/) |
+| Hosting    | VPS on Ubuntu 22.04 via Contabo |
+| CI/CD      | GitHub Actions (automatic build & deploy on push) |
+| Auth       | JWT-based authentication, role-based access |
+| OCR        | PDF text extraction using n8n + PyPDF |
+| Domain     | [`invoice-ai.presiyangeorgiev.eu`](https://invoice-ai.presiyangeorgiev.eu) |
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 🧠 Future Plans
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+- Add file storage for original invoices
+- Add search/filtering for tables
+- Notifications for status updates
+- Multi-language support
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🧑‍💻 Author
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/010dae20-602b-4a46-a35f-27047dd3672e) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Made by [Presiyan Georgiev](https://www.linkedin.com/in/presiyan-georgiev/)
