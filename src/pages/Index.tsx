@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -5,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, Upload, FileText, TrendingUp, Clock, FileCheck, Star, Zap, Check, CheckCheck } from "lucide-react";
+import { CheckCircle, Upload, FileText, TrendingUp, Clock, FileCheck, Star, Zap, Check, CheckCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -32,7 +33,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
   buttonVariant = "outline", 
   onClick 
 }) => (
-  <Card className="group transition-all duration-300 border-border hover:border-smartinvoice-purple dark:hover:border-smartinvoice-purple min-w-[250px] md:min-w-[280px] flex flex-col">
+  <Card className="group hover-scale border-border hover:border-smartinvoice-purple transition-all duration-300 dark:hover:border-smartinvoice-purple min-w-[250px] md:min-w-[280px] flex flex-col">
     <CardHeader className="flex flex-row items-center space-x-4 pb-2">
       <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center">
         {icon}
@@ -62,6 +63,9 @@ const Index = () => {
   const [successMessage, setSuccessMessage] = useState<SuccessMessage | null>(null);
   const navigate = useNavigate();
   const { accessConfig } = useAuth();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showLeftScroll, setShowLeftScroll] = useState(false);
+  const [showRightScroll, setShowRightScroll] = useState(true);
   
   useEffect(() => {
     // Check for success message in session storage
@@ -77,7 +81,30 @@ const Index = () => {
         console.error("Failed to parse success message:", error);
       }
     }
+
+    // Check if scroll buttons should be visible
+    checkScrollButtons();
+    window.addEventListener('resize', checkScrollButtons);
+    return () => window.removeEventListener('resize', checkScrollButtons);
   }, []);
+
+  const checkScrollButtons = () => {
+    if (!scrollContainerRef.current) return;
+    
+    const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+    setShowLeftScroll(scrollLeft > 0);
+    setShowRightScroll(scrollLeft < scrollWidth - clientWidth - 10); // 10px buffer
+  };
+
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (!scrollContainerRef.current) return;
+    
+    const scrollAmount = direction === 'left' ? -300 : 300;
+    scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    
+    // Update scroll button visibility after scrolling
+    setTimeout(checkScrollButtons, 300);
+  };
   
   const handleProcessAnother = () => {
     setShowSuccessDialog(false);
@@ -150,12 +177,27 @@ const Index = () => {
           </p>
         </div>
 
-        {/* Quick action cards with professional ScrollArea */}
-        <div className="relative px-1 md:px-4">
-          <ScrollArea className="w-full pb-4">
-            <div className="flex gap-6 pb-4 overflow-visible">
+        {/* Quick action cards - now horizontally scrollable */}
+        <div className="relative">
+          {showLeftScroll && (
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm border-gray-200 shadow-md hidden md:flex"
+              onClick={() => handleScroll('left')}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          )}
+          
+          <div className="overflow-hidden">
+            <div 
+              ref={scrollContainerRef} 
+              className="flex gap-6 pb-4 overflow-x-auto scrollbar-none snap-x" 
+              onScroll={checkScrollButtons}
+            >
               {filteredActionCards.map((card, index) => (
-                <div key={index} className="flex-shrink-0 transform transition-transform hover:scale-105 hover:z-10">
+                <div key={index} className="snap-start flex-shrink-0">
                   <ActionCard 
                     icon={card.icon}
                     title={card.title}
@@ -167,7 +209,18 @@ const Index = () => {
                 </div>
               ))}
             </div>
-          </ScrollArea>
+          </div>
+          
+          {showRightScroll && (
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm border-gray-200 shadow-md hidden md:flex"
+              onClick={() => handleScroll('right')}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         
         {/* Features section */}

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { CalendarIcon, DollarSignIcon, FileTextIcon, CheckIcon, XIcon, AlertTriangle, MessageSquare, ChevronDown, ChevronUp, FileX } from "lucide-react";
@@ -24,9 +25,6 @@ interface InvoiceListProps {
   showSubmittedBy?: boolean;
   isLoading: boolean;
   onRefresh?: () => void;
-  sortColumn?: string | null;
-  sortDirection?: "asc" | "desc" | null;
-  onSort?: (column: string) => void;
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -100,22 +98,13 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
   showApprovalStatus = false, 
   showSubmittedBy = false,
   isLoading, 
-  onRefresh,
-  sortColumn: externalSortColumn = null,
-  sortDirection: externalSortDirection = null,
-  onSort: externalOnSort
+  onRefresh
 }) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortColumn, setSortColumn] = useState<string | null>(externalSortColumn);
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(externalSortDirection);
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(null);
   
-  // Update local state when external sort props change
-  useEffect(() => {
-    setSortColumn(externalSortColumn);
-    setSortDirection(externalSortDirection);
-  }, [externalSortColumn, externalSortDirection]);
-
   const toggleRow = (id: string | number) => {
     setExpandedRows((prev) => ({
       ...prev,
@@ -124,20 +113,14 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
   };
 
   const handleSort = (column: string) => {
-    if (externalOnSort) {
-      // Use external sort handler if provided
-      externalOnSort(column);
+    if (sortColumn === column) {
+      // Toggle direction or reset if already sorting by this column
+      setSortDirection(sortDirection === "asc" ? "desc" : sortDirection === "desc" ? null : "asc");
+      setSortColumn(sortDirection === "desc" ? null : column);
     } else {
-      // Otherwise use internal sort logic
-      if (sortColumn === column) {
-        // Toggle direction or reset if already sorting by this column
-        setSortDirection(sortDirection === "asc" ? "desc" : sortDirection === "desc" ? null : "asc");
-        setSortColumn(sortDirection === "desc" ? null : column);
-      } else {
-        // Start with ascending sort for new column
-        setSortColumn(column);
-        setSortDirection("asc");
-      }
+      // Start with ascending sort for new column
+      setSortColumn(column);
+      setSortDirection("asc");
     }
   };
   

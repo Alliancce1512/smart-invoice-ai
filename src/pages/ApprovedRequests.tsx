@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getApprovedInvoices } from "@/utils/api";
 import Layout from "@/components/Layout";
@@ -12,8 +12,6 @@ import { Button } from "@/components/ui/button";
 
 const ApprovedRequests: React.FC = () => {
   const { userId, accessConfig } = useAuth();
-  const [sortColumn, setSortColumn] = useState<string | null>("date");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>("desc");
   
   // Redirect if user doesn't have permission
   if (!accessConfig?.canApproveInvoices) {
@@ -50,15 +48,6 @@ const ApprovedRequests: React.FC = () => {
     toast.info("Refreshing approved invoices...");
   };
 
-  const handleSort = (column: string) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
-  };
-
   return (
     <Layout>
       <div className="container mx-auto py-6">
@@ -80,9 +69,6 @@ const ApprovedRequests: React.FC = () => {
           isLoading={isLoading}
           onRefresh={handleRefresh}
           showApprovalStatus={true}
-          sortColumn={sortColumn}
-          sortDirection={sortDirection}
-          onSort={handleSort}
         />
       </div>
     </Layout>

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getUserInvoices } from "@/utils/api";
 import Layout from "@/components/Layout";
@@ -11,8 +11,6 @@ import { Button } from "@/components/ui/button";
 
 const MyRequests: React.FC = () => {
   const { userId } = useAuth();
-  const [sortColumn, setSortColumn] = useState<string | null>("date");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>("desc");
   
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["user-invoices", userId],
@@ -43,15 +41,6 @@ const MyRequests: React.FC = () => {
     toast.info("Refreshing invoices...");
   };
 
-  const handleSort = (column: string) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
-  };
-
   return (
     <Layout>
       <div className="container mx-auto py-6">
@@ -72,9 +61,6 @@ const MyRequests: React.FC = () => {
           showApprovalStatus={true}
           isLoading={isLoading}
           onRefresh={handleRefresh}
-          sortColumn={sortColumn}
-          sortDirection={sortDirection}
-          onSort={handleSort}
         />
       </div>
     </Layout>
