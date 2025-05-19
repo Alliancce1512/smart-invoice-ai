@@ -1,9 +1,36 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import InvoiceResult from "@/components/InvoiceResult";
+import { toast } from "@/components/ui/use-toast";
 
 const Results = () => {
+  const [invoices, setInvoices] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulating loading of the most recent extraction results
+    setIsLoading(true);
+    // We'll just use an empty array for now as this is just a placeholder
+    // In a real app, this would fetch the latest extraction results
+    setTimeout(() => {
+      setInvoices([]);
+      setIsLoading(false);
+    }, 500);
+  }, []);
+
+  const handleRefresh = () => {
+    setIsLoading(true);
+    // Simulate refresh
+    setTimeout(() => {
+      setIsLoading(false);
+      toast({
+        title: "Results refreshed",
+        description: "The latest extraction results have been loaded.",
+      });
+    }, 500);
+  };
+
   return (
     <Layout>
       <div className="w-full max-w-4xl mx-auto py-8 px-4">
@@ -12,7 +39,11 @@ const Results = () => {
           Review the extracted information and send for review
         </p>
         
-        <InvoiceResult />
+        <InvoiceResult 
+          invoices={invoices} 
+          isLoading={isLoading} 
+          onRefresh={handleRefresh}
+        />
       </div>
     </Layout>
   );
