@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,10 +23,20 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({
   onSend,
   invoice,
 }) => {
-  const [editedInvoice, setEditedInvoice] = useState({ ...invoice });
-  const [date, setDate] = useState<Date | undefined>(
-    invoice.invoiceDate ? new Date(invoice.invoiceDate) : undefined
-  );
+  const [editedInvoice, setEditedInvoice] = useState<any>({});
+  const [date, setDate] = useState<Date | undefined>(undefined);
+
+  // Initialize the editedInvoice and date when the invoice prop changes
+  useEffect(() => {
+    if (invoice) {
+      setEditedInvoice({ ...invoice });
+      setDate(invoice.invoiceDate ? new Date(invoice.invoiceDate) : undefined);
+    } else {
+      // Set default values when invoice is null
+      setEditedInvoice({});
+      setDate(undefined);
+    }
+  }, [invoice]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -64,7 +74,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({
             <Input
               id="vendor"
               name="vendor"
-              value={editedInvoice.vendor || ""}
+              value={editedInvoice?.vendor || ""}
               onChange={handleInputChange}
               className="col-span-3"
             />
@@ -94,6 +104,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({
                     selected={date}
                     onSelect={handleDateChange}
                     initialFocus
+                    className="p-3 pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
@@ -109,14 +120,14 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({
               name="amount"
               type="number"
               step="0.01"
-              value={editedInvoice.amount || ""}
+              value={editedInvoice?.amount || ""}
               onChange={handleInputChange}
               className="col-span-2"
             />
             <Input
               id="currency"
               name="currency"
-              value={editedInvoice.currency || "USD"}
+              value={editedInvoice?.currency || "USD"}
               onChange={handleInputChange}
               className="col-span-1"
               placeholder="Currency"
@@ -130,7 +141,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({
             <Input
               id="category"
               name="category"
-              value={editedInvoice.category || ""}
+              value={editedInvoice?.category || ""}
               onChange={handleInputChange}
               className="col-span-3"
             />
