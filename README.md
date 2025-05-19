@@ -56,7 +56,12 @@ Use the following accounts to explore the platform:
 - Add file storage for original invoices
 - Add search/filtering for tables
 - Notifications for status updates
-- Multi-language support
+- Multi-language support for the platform
+- Integrate an AI-powered chatbot that can assist users with:
+  - Explaining invoice statuses and actions
+  - Guiding new users through the platform
+  - Answering questions related to invoice categories, approval flows, and user roles
+  - Providing basic statistics (e.g. number of approved invoices this month, top vendors, average invoice amount)
 
 ---
 
