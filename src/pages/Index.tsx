@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -5,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, Upload, FileText, TrendingUp, Clock, FileCheck, Star, Zap } from "lucide-react";
+import { CheckCircle, Upload, FileText, TrendingUp, Clock, FileCheck, Star, Zap, Check, CheckCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface SuccessMessage {
@@ -110,15 +111,15 @@ const Index = () => {
                 </div>
                 <div className="space-y-1">
                   <CardTitle>Start Reviewing</CardTitle>
-                  <CardDescription>Manage invoice approvals</CardDescription>
+                  <CardDescription>Review invoices & send for approval</CardDescription>
                 </div>
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">
-                Review and approve pending invoice requests from your team members.
+                Review invoices and send them for final approval from authorized approvers.
               </CardContent>
               <CardFooter>
                 <Button 
-                  onClick={() => navigate("/approve")}
+                  onClick={() => navigate("/review")}
                   className="w-full bg-card hover:bg-muted text-foreground border border-input"
                   variant="outline"
                 >
@@ -127,6 +128,56 @@ const Index = () => {
               </CardFooter>
             </Card>
           )}
+          
+          {accessConfig?.canApproveInvoices && (
+            <Card className="group hover-scale border-border hover:border-smartinvoice-purple transition-all duration-300 dark:hover:border-smartinvoice-purple">
+              <CardHeader className="flex flex-row items-center space-x-4 pb-2">
+                <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center">
+                  <Check className="h-6 w-6 text-smartinvoice-purple" />
+                </div>
+                <div className="space-y-1">
+                  <CardTitle>Approve Invoices</CardTitle>
+                  <CardDescription>Final invoice approval</CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground">
+                Give final approval for invoices that have been reviewed and are ready for processing.
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  onClick={() => navigate("/approve")}
+                  className="w-full bg-card hover:bg-muted text-foreground border border-input"
+                  variant="outline"
+                >
+                  Approve Now
+                </Button>
+              </CardFooter>
+            </Card>
+          )}
+          
+          <Card className="group hover-scale border-border hover:border-smartinvoice-purple transition-all duration-300 dark:hover:border-smartinvoice-purple">
+            <CardHeader className="flex flex-row items-center space-x-4 pb-2">
+              <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center">
+                <CheckCheck className="h-6 w-6 text-smartinvoice-purple" />
+              </div>
+              <div className="space-y-1">
+                <CardTitle>Approved Requests</CardTitle>
+                <CardDescription>View approved invoices</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              Review all invoices that have been fully approved and are ready for payment.
+            </CardContent>
+            <CardFooter>
+              <Button 
+                onClick={() => navigate("/approved")}
+                className="w-full bg-card hover:bg-muted text-foreground border border-input"
+                variant="outline"
+              >
+                View Approved
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
         
         {/* Features section */}

@@ -190,7 +190,7 @@ const ReviewInvoices = () => {
           <Button 
             variant="outline" 
             onClick={handleRefresh}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 hover:bg-smartinvoice-soft-gray transition-all duration-300"
           >
             <RefreshCw className="h-4 w-4" />
             Refresh
@@ -224,7 +224,7 @@ const ReviewInvoices = () => {
           />
         ) : (
           <div className="space-y-4">
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden shadow-md">
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -285,7 +285,7 @@ const ReviewInvoices = () => {
                             <Button
                               size="sm"
                               onClick={() => openConfirmDialog(invoice)}
-                              className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark"
+                              className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark text-white font-medium transition-all duration-300 shadow-sm hover:shadow-md"
                             >
                               <Check className="h-4 w-4 mr-1" />
                               Send for Approval
@@ -294,7 +294,7 @@ const ReviewInvoices = () => {
                               size="sm"
                               variant="outline"
                               onClick={() => openEditDialog(invoice)}
-                              className="border-gray-300"
+                              className="border-gray-300 hover:bg-smartinvoice-soft-gray transition-all duration-300"
                             >
                               <Edit className="h-4 w-4 mr-1" />
                               Edit
@@ -303,7 +303,7 @@ const ReviewInvoices = () => {
                               size="sm"
                               variant="outline"
                               onClick={() => openDeclineDialog(invoice.id)}
-                              className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+                              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all duration-300"
                             >
                               <X className="h-4 w-4 mr-1" />
                               Decline
@@ -364,7 +364,7 @@ const ReviewInvoices = () => {
         onClose={() => setIsConfirmDialogOpen(false)}
         onConfirm={handleSendForApproval}
         title="Send Invoice for Approval"
-        description="Are you sure you want to send this invoice for approval? This action cannot be undone."
+        description={selectedInvoice ? `Are you sure you want to send the invoice from ${selectedInvoice.vendor} for ${formatCurrency(selectedInvoice.amount, selectedInvoice.currency)} for approval? This action cannot be undone.` : "Are you sure you want to send this invoice for approval?"}
         confirmLabel="Send for Approval"
         cancelLabel="Cancel"
       />
