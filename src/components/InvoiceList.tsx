@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { CalendarIcon, DollarSignIcon, FileTextIcon, CheckIcon, XIcon, AlertTriangle, MessageSquare, ChevronDown, ChevronUp, FileX } from "lucide-react";
 import { format } from "date-fns";
@@ -16,11 +17,14 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { EmptyPlaceholder } from "@/components/EmptyPlaceholder";
+import SortableHeader from "./SortableHeader";
 
 interface InvoiceListProps {
   invoices: any[];
   showApprovalStatus?: boolean;
   showSubmittedBy?: boolean;
+  showApprovedBy?: boolean;  // New prop for "Approved By" column
+  showReviewedBy?: boolean;  // New prop for "Reviewed By" column
   isLoading: boolean;
   onRefresh?: () => void;
 }
@@ -95,11 +99,15 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
   invoices, 
   showApprovalStatus = false, 
   showSubmittedBy = false,
+  showApprovedBy = false,
+  showReviewedBy = false,
   isLoading, 
   onRefresh
 }) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(null);
   
   const toggleRow = (id: string | number) => {
     setExpandedRows((prev) => ({
@@ -107,7 +115,72 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
       [id]: !prev[id],
     }));
   };
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      // Toggle direction or reset if already sorting by this column
+      setSortDirection(sortDirection === "asc" ? "desc" : sortDirection === "desc" ? null : "asc");
+      setSortColumn(sortDirection === "desc" ? null : column);
+    } else {
+      // Start with ascending sort for new column
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
   
+  // Apply sorting to data
+  const sortedInvoices = React.useMemo(() => {
+    const result = [...invoices];
+    if (sortColumn && sortDirection) {
+      result.sort((a, b) => {
+        let valA = a[sortColumn];
+        let valB = b[sortColumn];
+        
+        // Handle special cases like dates and amounts
+        if (sortColumn === "invoiceDate") {
+          valA = new Date(valA).getTime();
+          valB = new Date(valB).getTime();
+        } else if (sortColumn === "amount") {
+          valA = parseFloat(valA) || 0;
+          valB = parseFloat(valB) || 0;
+        } else if (sortColumn === "status") {
+          valA = a.status || (a.approved ? "approved" : a.declined ? "declined" : "for_approval");
+          valB = b.status || (b.approved ? "approved" : b.declined ? "declined" : "for_approval");
+        }
+        
+        if (valA < valB) return sortDirection === "asc" ? -1 : 1;
+        if (valA > valB) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return result;
+  }, [invoices, sortColumn, sortDirection]);
+  
+  // Calculate pagination
+  const totalPages = Math.ceil(sortedInvoices.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedInvoices = sortedInvoices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Reset expanded rows when changing pages
+    setExpandedRows({});
+  };
+
+  // This useEffect hook will always run, not conditionally
+  useEffect(() => {
+    if (!paginatedInvoices || paginatedInvoices.length === 0) return;
+    
+    const newExpandedRows: Record<string, boolean> = {};
+    paginatedInvoices.forEach(invoice => {
+      if ((invoice.status === "declined" || invoice.approved === false) && 
+          (invoice.review_comment || invoice.approval_comment)) {
+        newExpandedRows[invoice.id] = true;
+      }
+    });
+    setExpandedRows(prev => ({...prev, ...newExpandedRows}));
+  }, [paginatedInvoices, currentPage]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -116,7 +189,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
     );
   }
 
-  if (!invoices || invoices.length === 0) {
+  if (!sortedInvoices || sortedInvoices.length === 0) {
     return (
       <EmptyPlaceholder
         icon={<FileX className="h-12 w-12 text-muted-foreground" />}
@@ -134,17 +207,6 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
     );
   }
 
-  // Calculate pagination
-  const totalPages = Math.ceil(invoices.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedInvoices = invoices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    // Reset expanded rows when changing pages
-    setExpandedRows({});
-  };
-
   return (
     <div className="space-y-4">
       <Card className="w-full overflow-hidden">
@@ -152,12 +214,71 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Vendor</TableHead>
-                <TableHead>Invoice Date</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Category</TableHead>
-                {showSubmittedBy && <TableHead>Submitted By</TableHead>}
-                {showApprovalStatus && <TableHead>Status</TableHead>}
+                <SortableHeader
+                  sortKey="vendor"
+                  currentSortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                >
+                  Vendor
+                </SortableHeader>
+                <SortableHeader
+                  sortKey="invoiceDate"
+                  currentSortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                >
+                  Invoice Date
+                </SortableHeader>
+                <SortableHeader
+                  sortKey="amount"
+                  currentSortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                >
+                  Amount
+                </SortableHeader>
+                <SortableHeader
+                  sortKey="category"
+                  currentSortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                >
+                  Category
+                </SortableHeader>
+                {showSubmittedBy && (
+                  <SortableHeader
+                    sortKey="submittedBy"
+                    currentSortColumn={sortColumn}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  >
+                    Submitted By
+                  </SortableHeader>
+                )}
+                {showReviewedBy && (
+                  <SortableHeader
+                    sortKey="reviewedBy"
+                    currentSortColumn={sortColumn}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  >
+                    Reviewed By
+                  </SortableHeader>
+                )}
+                {showApprovedBy && (
+                  <SortableHeader
+                    sortKey="approvedBy"
+                    currentSortColumn={sortColumn}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  >
+                    Approved By
+                  </SortableHeader>
+                )}
+                {showApprovalStatus && (
+                  <TableHead>Status</TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -190,10 +311,12 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
                     </TableCell>
                     <TableCell>{invoice.category}</TableCell>
                     {showSubmittedBy && <TableCell>{invoice.submittedBy}</TableCell>}
+                    {showReviewedBy && <TableCell>{invoice.reviewedBy || 'N/A'}</TableCell>}
+                    {showApprovedBy && <TableCell>{invoice.approvedBy || 'N/A'}</TableCell>}
                     {showApprovalStatus && (
                       <TableCell>
                         <div className="flex items-center justify-between">
-                          <StatusBadge status={invoice.status || (invoice.approved ? "approved" : "for_approval")} />
+                          <StatusBadge status={invoice.status || (invoice.approved ? "approved" : invoice.declined ? "declined" : "for_approval")} />
                           
                           {(invoice.review_comment || invoice.approval_comment) && (
                             <button 
@@ -217,7 +340,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
                   
                   {(invoice.review_comment || invoice.approval_comment) && (
                     <TableRow className="bg-gray-50">
-                      <TableCell colSpan={showSubmittedBy ? 6 : 5} className="p-0">
+                      <TableCell colSpan={showSubmittedBy && (showApprovedBy || showReviewedBy) ? 7 : (showSubmittedBy || showApprovedBy || showReviewedBy) ? 6 : 5} className="p-0">
                         <Collapsible open={expandedRows[invoice.id]}>
                           <CollapsibleContent>
                             <div className="px-4 py-2 space-y-2">

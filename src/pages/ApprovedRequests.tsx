@@ -65,7 +65,8 @@ const ApprovedRequests: React.FC = () => {
         
         <InvoiceList 
           invoices={invoices}
-          showSubmittedBy={true} 
+          showSubmittedBy={true}
+          showApprovedBy={true}
           isLoading={isLoading}
           onRefresh={handleRefresh}
           showApprovalStatus={true}
