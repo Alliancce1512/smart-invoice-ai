@@ -32,6 +32,9 @@ Use the following accounts to explore the platform:
 | Standard Employee | `user`     | `admin123` |
 | Reviewer          | `reviewer` | `admin123` |
 | Approver          | `approver` | `admin123` |
+| Admin             | `admin`    | `admin123` |
+
+Note: The `admin` account has access to all the platform features (Upload, Review, Approve, etc).
 
 ---
 
