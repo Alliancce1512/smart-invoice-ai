@@ -1,20 +1,22 @@
 
 import React, { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
-import InvoiceResult from "@/components/InvoiceResult";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import EditInvoiceDialog from "@/components/EditInvoiceDialog";
 import { submitInvoice } from "@/utils/api";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Edit, FileJson } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { format } from "date-fns";
+import JsonViewDialog from "@/components/JsonViewDialog";
 
 const Results = () => {
   const [invoiceData, setInvoiceData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showJsonView, setShowJsonView] = useState(false);
   const navigate = useNavigate();
   const { accessConfig } = useAuth();
 
@@ -54,6 +56,16 @@ const Results = () => {
     setIsEditing(false);
   };
 
+  const formatDisplayDate = (dateString) => {
+    if (!dateString) return "N/A";
+    try {
+      const date = new Date(dateString);
+      return format(date, "dd.MM.yyyy");
+    } catch (error) {
+      return dateString;
+    }
+  };
+
   const handleSendInvoice = async (editedInvoice: any) => {
     setIsSubmitting(true);
     try {
@@ -87,6 +99,16 @@ const Results = () => {
             Back
           </Button>
           <h1 className="text-3xl font-bold mb-0 ml-2 dark:text-white">Invoice Results</h1>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="ml-auto" 
+            onClick={() => setShowJsonView(true)}
+          >
+            <FileJson className="h-4 w-4 mr-2" />
+            JSON
+          </Button>
         </div>
         <p className="text-gray-600 mb-8 dark:text-gray-300">
           Review the extracted information before submitting
@@ -94,8 +116,19 @@ const Results = () => {
         
         {invoiceData && (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/30 dark:border dark:border-gray-700">
-              <h2 className="text-xl font-semibold mb-4 dark:text-white">Invoice Details</h2>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/30 dark:border dark:border-gray-700 relative">
+              <div className="flex justify-between items-start mb-4">
+                <h2 className="text-xl font-semibold dark:text-white">Invoice Details</h2>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="p-1 h-auto text-gray-500 hover:text-smartinvoice-purple dark:text-gray-400"
+                  onClick={handleEditInvoice}
+                >
+                  <Edit className="h-4 w-4" />
+                  <span className="sr-only">Edit invoice</span>
+                </Button>
+              </div>
               <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Vendor</dt>
@@ -103,7 +136,9 @@ const Results = () => {
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Date</dt>
-                  <dd className="mt-1 text-lg text-gray-900 dark:text-white">{invoiceData.date}</dd>
+                  <dd className="mt-1 text-lg text-gray-900 dark:text-white">
+                    {formatDisplayDate(invoiceData.date)}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Amount</dt>
@@ -129,13 +164,6 @@ const Results = () => {
             </div>
 
             <div className="flex justify-end space-x-4">
-              <Button
-                variant="outline"
-                onClick={handleEditInvoice}
-                className="border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
-              >
-                Edit Details
-              </Button>
               <Button
                 onClick={() => handleSendInvoice(invoiceData)}
                 disabled={isSubmitting}
@@ -169,6 +197,13 @@ const Results = () => {
           onClose={handleCloseEdit}
           onSend={handleSendInvoice}
           invoice={invoiceData}
+        />
+        
+        {/* JSON View dialog */}
+        <JsonViewDialog 
+          isOpen={showJsonView} 
+          onClose={() => setShowJsonView(false)} 
+          data={invoiceData} 
         />
       </div>
     </Layout>

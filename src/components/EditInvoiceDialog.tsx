@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,26 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+// Define the category options
+const CATEGORIES = [
+  "Cloud Services",
+  "Software Subscriptions",
+  "Office Supplies",
+  "Travel",
+  "Meals & Entertainment",
+  "Training & Education",
+  "Consulting Services",
+  "Legal & Accounting",
+  "Marketing & Advertising",
+  "Equipment",
+  "Utilities",
+  "SaaS Tools",
+  "Events & Conferences",
+  "Transportation",
+  "Other"
+];
 
 interface EditInvoiceDialogProps {
   isOpen: boolean;
@@ -30,7 +49,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({
   useEffect(() => {
     if (invoice) {
       setEditedInvoice({ ...invoice });
-      setDate(invoice.invoiceDate ? new Date(invoice.invoiceDate) : undefined);
+      setDate(invoice.date ? new Date(invoice.date) : undefined);
     } else {
       // Set default values when invoice is null
       setEditedInvoice({});
@@ -49,11 +68,19 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({
   const handleDateChange = (date: Date | undefined) => {
     setDate(date);
     if (date) {
+      // Keep the date format in the data as yyyy-MM-dd
       setEditedInvoice(prev => ({
         ...prev,
-        invoiceDate: format(date, "yyyy-MM-dd"),
+        date: format(date, "yyyy-MM-dd"),
       }));
     }
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setEditedInvoice(prev => ({
+      ...prev,
+      category: value,
+    }));
   };
 
   const handleSend = () => {
@@ -104,7 +131,7 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                    {date ? format(date, "dd.MM.yyyy") : <span>Pick a date</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -147,13 +174,23 @@ const EditInvoiceDialog: React.FC<EditInvoiceDialogProps> = ({
             <Label htmlFor="category" className="text-right font-medium text-gray-700 dark:text-gray-300">
               Category
             </Label>
-            <Input
-              id="category"
-              name="category"
-              value={editedInvoice?.category || ""}
-              onChange={handleInputChange}
-              className="col-span-3 border-gray-300 focus:border-smartinvoice-purple focus:ring focus:ring-smartinvoice-purple/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
+            <div className="col-span-3">
+              <Select 
+                value={editedInvoice?.category || ""} 
+                onValueChange={handleCategoryChange}
+              >
+                <SelectTrigger className="border-gray-300 focus:border-smartinvoice-purple focus:ring focus:ring-smartinvoice-purple/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent className="max-h-[300px] overflow-y-auto">
+                  {CATEGORIES.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
         
