@@ -184,7 +184,7 @@ export const getApprovedInvoices = async (username: string): Promise<any> => {
   }
 };
 
-// Function to get invoices for review
+// New function to get invoices for review
 export const getInvoicesForReview = async (username: string): Promise<any> => {
   try {
     const response = await fetch("https://n8n.presiyangeorgiev.eu/webhook/smartinvoice/get-invoices-for-review", {
@@ -192,8 +192,7 @@ export const getInvoicesForReview = async (username: string): Promise<any> => {
       headers: {
         ...getAuthHeaders(),
         "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username }) // Add the username param to match other API calls
+      }
     });
     
     return await handleApiResponse(response);
@@ -218,8 +217,7 @@ export const markInvoiceForApproval = async (invoiceId: number): Promise<any> =>
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        invoiceId,
-        username // Add username to the payload
+        invoiceId
       }),
     });
     
@@ -256,7 +254,6 @@ export const declineInvoice = async (invoiceId: number, reason?: string): Promis
       body: JSON.stringify({
         invoiceId,
         reason: reason || "",
-        username // Add username to the payload
       }),
     });
     

@@ -1,385 +1,351 @@
 
-import React, { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { CalendarIcon, DollarSignIcon, FileTextIcon, CheckIcon, XIcon, AlertTriangle, MessageSquare, ChevronDown, ChevronUp, FileX } from "lucide-react";
-import { format } from "date-fns";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { EmptyPlaceholder } from "@/components/EmptyPlaceholder";
-import SortableHeader from "./SortableHeader";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { submitInvoice } from "@/utils/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { Edit, CheckCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-interface InvoiceListProps {
-  invoices: any[];
-  showApprovalStatus?: boolean;
-  showSubmittedBy?: boolean;
-  isLoading: boolean;
-  onRefresh?: () => void;
+const EXPENSE_CATEGORIES = [
+  "Cloud Services", 
+  "Software Subscriptions", 
+  "Office Supplies", 
+  "Travel", 
+  "Meals & Entertainment", 
+  "Training & Education", 
+  "Consulting Services", 
+  "Legal & Accounting", 
+  "Marketing & Advertising", 
+  "Equipment", 
+  "Utilities", 
+  "SaaS Tools", 
+  "Events & Conferences", 
+  "Transportation", 
+  "Other"
+];
+
+interface InvoiceData {
+  vendor: string;
+  amount: number;
+  currency: string;
+  date?: string; // The date field from backend
+  invoiceDate?: string; // For compatibility with previous code
+  iban: string;
+  category: string;
+  [key: string]: any; // Allow for additional properties in the API response
 }
 
-const ITEMS_PER_PAGE = 10;
+const InvoiceResult = () => {
+  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+  const [editedInvoiceData, setEditedInvoiceData] = useState<InvoiceData | null>(null);
+  const [showJson, setShowJson] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const navigate = useNavigate();
+  const { accessConfig } = useAuth();
 
-const formatCurrency = (amount: string | number, currency: string = "USD") => {
-  if (!amount) return "-";
-  
-  try {
-    const numericAmount = typeof amount === "string" ? parseFloat(amount) : amount;
-    if (isNaN(numericAmount)) return "-";
-    
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency || "USD",
-    }).format(numericAmount);
-  } catch (error) {
-    // Fallback formatting if there's an error with Intl.NumberFormat
-    return `${currency || "$"}${parseFloat(amount as string).toFixed(2)}`;
-  }
-};
-
-const formatDate = (dateString: string) => {
-  try {
-    return format(new Date(dateString), "dd.MM.yyyy");
-  } catch (error) {
-    return dateString;
-  }
-};
-
-const StatusBadge = ({ status }: { status: string }) => {
-  switch (status) {
-    case "for_review":
-      return (
-        <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-200">
-          <AlertTriangle className="w-3 h-3 mr-1" />
-          Awaiting Review
-        </Badge>
-      );
-    case "for_approval":
-      return (
-        <Badge variant="outline" className="bg-amber-100 text-amber-600 border-amber-200">
-          <AlertTriangle className="w-3 h-3 mr-1" />
-          Awaiting Approval
-        </Badge>
-      );
-    case "approved":
-      return (
-        <Badge variant="outline" className="bg-green-100 text-green-600 border-green-200">
-          <CheckIcon className="w-3 h-3 mr-1" />
-          Approved
-        </Badge>
-      );
-    case "declined":
-      return (
-        <Badge variant="outline" className="bg-red-100 text-red-600 border-red-200">
-          <XIcon className="w-3 h-3 mr-1" />
-          Declined
-        </Badge>
-      );
-    default:
-      return (
-        <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-200">
-          Unknown
-        </Badge>
-      );
-  }
-};
-
-const InvoiceList: React.FC<InvoiceListProps> = ({ 
-  invoices, 
-  showApprovalStatus = false, 
-  showSubmittedBy = false,
-  isLoading, 
-  onRefresh
-}) => {
-  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortColumn, setSortColumn] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(null);
-  
-  const toggleRow = (id: string | number) => {
-    setExpandedRows((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
-  const handleSort = (column: string) => {
-    if (sortColumn === column) {
-      // Toggle direction or reset if already sorting by this column
-      setSortDirection(sortDirection === "asc" ? "desc" : sortDirection === "desc" ? null : "asc");
-      setSortColumn(sortDirection === "desc" ? null : column);
-    } else {
-      // Start with ascending sort for new column
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
-  };
-  
-  // Apply sorting to data
-  const sortedInvoices = React.useMemo(() => {
-    const result = [...invoices];
-    if (sortColumn && sortDirection) {
-      result.sort((a, b) => {
-        let valA = a[sortColumn];
-        let valB = b[sortColumn];
-        
-        // Handle special cases like dates and amounts
-        if (sortColumn === "invoiceDate") {
-          valA = new Date(valA).getTime();
-          valB = new Date(valB).getTime();
-        } else if (sortColumn === "amount") {
-          valA = parseFloat(valA) || 0;
-          valB = parseFloat(valB) || 0;
-        }
-        
-        if (valA < valB) return sortDirection === "asc" ? -1 : 1;
-        if (valA > valB) return sortDirection === "asc" ? 1 : -1;
-        return 0;
-      });
-    }
-    return result;
-  }, [invoices, sortColumn, sortDirection]);
-  
-  // Calculate pagination
-  const totalPages = Math.ceil(sortedInvoices.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedInvoices = sortedInvoices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    // Reset expanded rows when changing pages
-    setExpandedRows({});
-  };
-
-  // Make sure hooks are always called in the same order
   useEffect(() => {
-    if (!paginatedInvoices || paginatedInvoices.length === 0) return;
-    
-    const newExpandedRows: Record<string, boolean> = {};
-    paginatedInvoices.forEach(invoice => {
-      if ((invoice.status === "declined" || invoice.approved === false) && 
-          (invoice.review_comment || invoice.approval_comment)) {
-        newExpandedRows[invoice.id] = true;
+    // Get stored data from the upload process
+    const storedData = sessionStorage.getItem("invoiceData");
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        setInvoiceData(parsedData);
+        setEditedInvoiceData(parsedData);
+      } catch (error) {
+        console.error("Failed to parse invoice data:", error);
+        navigate("/");
       }
-    });
-    setExpandedRows(prev => ({...prev, ...newExpandedRows}));
-  }, [paginatedInvoices, currentPage]);
+    } else {
+      // Redirect if no data is found
+      navigate("/");
+    }
+  }, [navigate]);
 
-  if (isLoading) {
+  if (!invoiceData) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">Loading invoices...</p>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="h-12 w-12 bg-gray-200 rounded-full mb-4 dark:bg-gray-700"></div>
+          <div className="h-4 w-48 bg-gray-200 rounded mb-2 dark:bg-gray-700"></div>
+          <div className="h-4 w-32 bg-gray-200 rounded dark:bg-gray-700"></div>
+        </div>
       </div>
     );
   }
 
-  if (!sortedInvoices || sortedInvoices.length === 0) {
-    return (
-      <EmptyPlaceholder
-        icon={<FileX className="h-12 w-12 text-muted-foreground" />}
-        title="No invoices to display"
-        description="There are currently no invoices to display."
-        action={onRefresh ? {
-          label: "Refresh",
-          href: "#",
-          onClick: (e) => {
-            e.preventDefault();
-            onRefresh();
-          }
-        } : undefined}
-      />
-    );
-  }
+  // Get the invoice date from either the date or invoiceDate field
+  const getInvoiceDate = () => {
+    if (isEditing ? editedInvoiceData?.invoiceDate : invoiceData?.invoiceDate) 
+      return isEditing ? editedInvoiceData?.invoiceDate : invoiceData?.invoiceDate;
+    if (isEditing ? editedInvoiceData?.date : invoiceData?.date) 
+      return isEditing ? editedInvoiceData?.date : invoiceData?.date;
+    return "N/A";
+  };
+
+  // Format the date to dd.MM.yyyy regardless of input format
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "N/A";
+    
+    try {
+      // Try to parse the date
+      const date = new Date(dateString);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return dateString; // Return original if invalid
+      }
+      
+      // Format to dd.MM.yyyy
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${day}.${month}.${year}`;
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString; // Return the original string if parsing fails
+    }
+  };
+
+  const formatCurrency = (amount: number, currency: string) => {
+    if (amount === undefined || amount === null) return "N/A";
+    
+    try {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: currency || "USD"
+      }).format(amount);
+    } catch (error) {
+      console.error("Error formatting currency:", error);
+      return `${amount} ${currency || ""}`;
+    }
+  };
+
+  const handleSubmitInvoice = async () => {
+    if (!invoiceData) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Prepare the invoice data for submission, ensuring date is in dd.MM.yyyy format
+      const formattedDate = formatDate(getInvoiceDate());
+      
+      // Determine if the invoice was edited by comparing original and edited data
+      const wasEdited = isEditing && JSON.stringify(invoiceData) !== JSON.stringify(editedInvoiceData);
+      
+      // Use the appropriate data source depending on edit state
+      const dataToSubmit = isEditing ? editedInvoiceData : invoiceData;
+      
+      const submitData = {
+        vendor: dataToSubmit!.vendor,
+        invoiceDate: formattedDate,
+        amount: dataToSubmit!.amount,
+        currency: dataToSubmit!.currency,
+        iban: dataToSubmit!.iban || "",
+        category: dataToSubmit!.category || "Other",
+        edited: wasEdited
+      };
+
+      // Submit the invoice
+      const response = await submitInvoice(submitData);
+      
+      if (response.status === 0) {
+        // Store success message to show on the home page
+        sessionStorage.setItem("invoiceSuccessMessage", JSON.stringify({
+          vendor: dataToSubmit!.vendor,
+          action: 'submitted'
+        }));
+        
+        // Navigate to home after successful submission
+        navigate("/");
+      } else {
+        toast.error("Failed to submit invoice. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting invoice:", error);
+      toast.error("Failed to submit invoice. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditToggle = () => {
+    if (isEditing) {
+      // Reset edited data when canceling edit mode
+      setEditedInvoiceData({...invoiceData!});
+    }
+    setIsEditing(!isEditing);
+  };
+
+  const handleInputChange = (field: string, value: string | number) => {
+    if (editedInvoiceData) {
+      setEditedInvoiceData({
+        ...editedInvoiceData,
+        [field]: value
+      });
+    }
+  };
+
+  const handleProcessAnother = () => {
+    navigate("/upload");
+  };
 
   return (
-    <div className="space-y-4">
-      <Card className="w-full overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <SortableHeader
-                  sortKey="vendor"
-                  currentSortColumn={sortColumn}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                >
-                  Vendor
-                </SortableHeader>
-                <SortableHeader
-                  sortKey="invoiceDate"
-                  currentSortColumn={sortColumn}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                >
-                  Invoice Date
-                </SortableHeader>
-                <SortableHeader
-                  sortKey="amount"
-                  currentSortColumn={sortColumn}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                >
-                  Amount
-                </SortableHeader>
-                <SortableHeader
-                  sortKey="category"
-                  currentSortColumn={sortColumn}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                >
-                  Category
-                </SortableHeader>
-                {showSubmittedBy && (
-                  <SortableHeader
-                    sortKey="submittedBy"
-                    currentSortColumn={sortColumn}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  >
-                    Submitted By
-                  </SortableHeader>
-                )}
-                {showApprovalStatus && (
-                  <TableHead>Status</TableHead>
-                )}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedInvoices.map((invoice) => (
-                <React.Fragment key={invoice.id}>
-                  <TableRow
-                    className={cn(
-                      "cursor-pointer",
-                      (invoice.review_comment || invoice.approval_comment) && "border-b-0"
-                    )}
-                    onClick={() => (invoice.review_comment || invoice.approval_comment) && toggleRow(invoice.id)}
-                  >
-                    <TableCell>
-                      <div className="flex items-center">
-                        <FileTextIcon className="w-4 h-4 mr-2 text-muted-foreground" />
-                        {invoice.vendor}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <CalendarIcon className="w-4 h-4 mr-2 text-muted-foreground" />
-                        {formatDate(invoice.invoiceDate)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <DollarSignIcon className="w-4 h-4 mr-2 text-muted-foreground" />
-                        {formatCurrency(invoice.amount, invoice.currency)}
-                      </div>
-                    </TableCell>
-                    <TableCell>{invoice.category}</TableCell>
-                    {showSubmittedBy && <TableCell>{invoice.submittedBy}</TableCell>}
-                    {showApprovalStatus && (
-                      <TableCell>
-                        <div className="flex items-center justify-between">
-                          <StatusBadge status={invoice.status || (invoice.approved ? "approved" : invoice.declined ? "declined" : "for_approval")} />
-                          
-                          {(invoice.review_comment || invoice.approval_comment) && (
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleRow(invoice.id);
-                              }}
-                              className="ml-2 p-1 rounded-full hover:bg-gray-100"
-                            >
-                              {expandedRows[invoice.id] ? (
-                                <ChevronUp className="h-4 w-4 text-gray-500" />
-                              ) : (
-                                <ChevronDown className="h-4 w-4 text-gray-500" />
-                              )}
-                            </button>
-                          )}
-                        </div>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                  
-                  {(invoice.review_comment || invoice.approval_comment) && (
-                    <TableRow className="bg-gray-50">
-                      <TableCell colSpan={showSubmittedBy ? 6 : 5} className="p-0">
-                        <Collapsible open={expandedRows[invoice.id]}>
-                          <CollapsibleContent>
-                            <div className="px-4 py-2 space-y-2">
-                              {invoice.review_comment && (
-                                <div className="flex items-start gap-2 text-sm">
-                                  <MessageSquare className="h-4 w-4 text-gray-500 mt-0.5" />
-                                  <div>
-                                    <span className="font-medium text-gray-700">Review Comment:</span>{" "}
-                                    <span className="text-gray-600">{invoice.review_comment}</span>
-                                  </div>
-                                </div>
-                              )}
-                              {invoice.approval_comment && (
-                                <div className="flex items-start gap-2 text-sm">
-                                  <MessageSquare className="h-4 w-4 text-gray-500 mt-0.5" />
-                                  <div>
-                                    <span className="font-medium text-gray-700">Approval Comment:</span>{" "}
-                                    <span className="text-gray-600">{invoice.approval_comment}</span>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </CollapsibleContent>
-                        </Collapsible>
-                      </TableCell>
-                    </TableRow>
+    <div className="w-full max-w-3xl mx-auto animate-scale-in">
+      <Card className="card-shadow dark:bg-gray-800/80 dark:border-gray-700 shadow-lg">
+        <CardHeader className="flex flex-row items-center justify-between bg-gray-50 dark:bg-gray-800 rounded-t-lg border-b dark:border-gray-700">
+          <CardTitle className="text-xl font-semibold dark:text-white">Invoice Details</CardTitle>
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleEditToggle}
+              className="flex items-center gap-2"
+            >
+              <Edit size={16} />
+              {isEditing ? "Cancel Editing" : "Edit"}
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setShowJson(!showJson)}
+              className="dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 dark:border-gray-600"
+            >
+              {showJson ? "Hide JSON" : "View JSON"}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          {showJson ? (
+            <div className="bg-gray-50 p-4 rounded-md overflow-auto max-h-96 dark:bg-gray-900 dark:text-gray-200">
+              <pre className="text-xs text-gray-800 dark:text-gray-200">{JSON.stringify(isEditing ? editedInvoiceData : invoiceData, null, 2)}</pre>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="vendor" className="text-gray-500 dark:text-gray-300 text-sm font-medium">Vendor Name</Label>
+                  {isEditing ? (
+                    <Input 
+                      id="vendor"
+                      value={editedInvoiceData?.vendor || ""}
+                      onChange={(e) => handleInputChange("vendor", e.target.value)}
+                      className="mt-1"
+                    />
+                  ) : (
+                    <div id="vendor" className="font-medium text-lg mt-1 dark:text-white py-2 px-3 bg-gray-50 rounded-md dark:bg-gray-700/50">{invoiceData.vendor || "N/A"}</div>
                   )}
-                </React.Fragment>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </Card>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="amount" className="text-gray-500 dark:text-gray-300 text-sm font-medium">Amount</Label>
+                  {isEditing ? (
+                    <div className="flex gap-2 mt-1">
+                      <Input 
+                        id="amount"
+                        type="number"
+                        value={editedInvoiceData?.amount || 0}
+                        onChange={(e) => handleInputChange("amount", parseFloat(e.target.value))}
+                        className="flex-1"
+                      />
+                      <Select
+                        value={editedInvoiceData?.currency || "USD"}
+                        onValueChange={(value) => handleInputChange("currency", value)}
+                      >
+                        <SelectTrigger className="w-24">
+                          <SelectValue placeholder="Currency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="USD">USD</SelectItem>
+                          <SelectItem value="EUR">EUR</SelectItem>
+                          <SelectItem value="GBP">GBP</SelectItem>
+                          <SelectItem value="BGN">BGN</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ) : (
+                    <div id="amount" className="font-medium text-lg mt-1 dark:text-white py-2 px-3 bg-gray-50 rounded-md dark:bg-gray-700/50">
+                      {formatCurrency(invoiceData.amount, invoiceData.currency)}
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="date" className="text-gray-500 dark:text-gray-300 text-sm font-medium">Invoice Date</Label>
+                  {isEditing ? (
+                    <Input 
+                      id="date"
+                      type="date"
+                      value={editedInvoiceData?.date || ""}
+                      onChange={(e) => handleInputChange("date", e.target.value)}
+                      className="mt-1"
+                    />
+                  ) : (
+                    <div id="date" className="font-medium mt-1 dark:text-white py-2 px-3 bg-gray-50 rounded-md dark:bg-gray-700/50">{formatDate(getInvoiceDate())}</div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="iban" className="text-gray-500 dark:text-gray-300 text-sm font-medium">IBAN</Label>
+                  {isEditing ? (
+                    <Input 
+                      id="iban"
+                      value={editedInvoiceData?.iban || ""}
+                      onChange={(e) => handleInputChange("iban", e.target.value)}
+                      className="mt-1"
+                    />
+                  ) : (
+                    <div id="iban" className="font-medium mt-1 dark:text-white py-2 px-3 bg-gray-50 rounded-md dark:bg-gray-700/50">{invoiceData.iban || "N/A"}</div>
+                  )}
+                </div>
+              </div>
 
-      {/* Pagination controls */}
-      {totalPages > 1 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious 
-                onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-              />
-            </PaginationItem>
-            
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <PaginationItem key={page}>
-                <PaginationLink
-                  isActive={page === currentPage}
-                  onClick={() => handlePageChange(page)}
-                  className="cursor-pointer"
+              <div className="pt-4 space-y-2">
+                <Label htmlFor="category" className="text-gray-500 dark:text-gray-300 text-sm font-medium block mb-1">Expense Category</Label>
+                {isEditing ? (
+                  <Select
+                    value={editedInvoiceData?.category || "Other"}
+                    onValueChange={(value) => handleInputChange("category", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EXPENSE_CATEGORIES.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div id="category" className="font-medium px-3 py-2 bg-gray-50 rounded-md dark:bg-gray-700/50 dark:text-white">
+                    {invoiceData.category || "Other"}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-6 mt-2">
+                <Button 
+                  className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark"
+                  disabled={isSubmitting}
+                  onClick={handleSubmitInvoice}
                 >
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            
-            <PaginationItem>
-              <PaginationNext 
-                onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
-                className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      )}
+                  {isSubmitting ? 'Processing...' : 'Send for Review'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
-export default InvoiceList;
+export default InvoiceResult;

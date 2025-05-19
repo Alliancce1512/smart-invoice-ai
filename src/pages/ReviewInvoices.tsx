@@ -5,12 +5,10 @@ import { getInvoicesForReview, markInvoiceForApproval, declineInvoice } from "@/
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Check, X, RefreshCw, Edit } from "lucide-react";
+import { Check, X, RefreshCw } from "lucide-react";
 import { EmptyPlaceholder } from "@/components/EmptyPlaceholder";
 import Layout from "@/components/Layout";
 import DeclineInvoiceDialog from "@/components/DeclineInvoiceDialog";
-import ConfirmationDialog from "@/components/ConfirmationDialog";
-import EditInvoiceDialog from "@/components/EditInvoiceDialog";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import {
@@ -21,20 +19,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import SortableHeader from "@/components/SortableHeader";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const ITEMS_PER_PAGE = 10;
 
 const ReviewInvoices = () => {
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
   const [isDeclineDialogOpen, setIsDeclineDialogOpen] = useState(false);
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortColumn, setSortColumn] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(null);
   
   const username = localStorage.getItem("smartinvoice_user_id") || "";
   
@@ -48,28 +39,7 @@ const ReviewInvoices = () => {
     queryFn: () => getInvoicesForReview(username),
   });
   
-  let invoices = data?.invoices || [];
-  
-  // Apply sorting
-  if (sortColumn && sortDirection) {
-    invoices = [...invoices].sort((a, b) => {
-      let valA = a[sortColumn];
-      let valB = b[sortColumn];
-      
-      // Handle special cases
-      if (sortColumn === "invoiceDate") {
-        valA = new Date(valA).getTime();
-        valB = new Date(valB).getTime();
-      } else if (sortColumn === "amount") {
-        valA = parseFloat(valA) || 0;
-        valB = parseFloat(valB) || 0;
-      }
-      
-      if (valA < valB) return sortDirection === "asc" ? -1 : 1;
-      if (valA > valB) return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    });
-  }
+  const invoices = data?.invoices || [];
   
   // Calculate pagination
   const totalPages = Math.ceil(invoices.length / ITEMS_PER_PAGE);
@@ -80,57 +50,15 @@ const ReviewInvoices = () => {
     setCurrentPage(page);
   };
   
-  const handleSort = (column: string) => {
-    if (sortColumn === column) {
-      // Toggle direction or reset if already sorting by this column
-      setSortDirection(sortDirection === "asc" ? "desc" : sortDirection === "desc" ? null : "asc");
-      setSortColumn(sortDirection === "desc" ? null : column);
-    } else {
-      // Start with ascending sort for new column
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
-  };
-  
-  const openConfirmDialog = (invoice: any) => {
-    setSelectedInvoice(invoice);
-    setIsConfirmDialogOpen(true);
-  };
-  
-  const handleSendForApproval = async () => {
-    if (selectedInvoice) {
-      try {
-        await markInvoiceForApproval(selectedInvoice.id);
-        refetch();
-        toast.success("Invoice sent for approval");
-        setIsConfirmDialogOpen(false);
-        setSelectedInvoice(null);
-      } catch (error) {
-        toast.error("Error sending invoice for approval");
-        console.error("Error sending invoice for approval:", error);
-      }
-    }
-  };
-  
-  const openEditDialog = (invoice: any) => {
-    setSelectedInvoice({...invoice});
-    setIsEditDialogOpen(true);
-  };
-  
-  const handleEditAndSend = async (editedInvoice: any) => {
-    // First close the dialog to give feedback
-    setIsEditDialogOpen(false);
-    
+  const handleSendForApproval = async (invoiceId: number) => {
     try {
-      // The edited invoice still needs to be sent for approval
-      await markInvoiceForApproval(editedInvoice.id);
+      await markInvoiceForApproval(invoiceId);
       refetch();
-      toast.success("Invoice updated and sent for approval");
+      toast.success("Invoice sent for approval");
     } catch (error) {
-      toast.error("Error updating and sending invoice");
-      console.error("Error:", error);
+      toast.error("Error sending invoice for approval");
+      console.error("Error sending invoice for approval:", error);
     }
-    setSelectedInvoice(null);
   };
   
   const openDeclineDialog = (invoiceId: number) => {
@@ -191,7 +119,7 @@ const ReviewInvoices = () => {
           <Button 
             variant="outline" 
             onClick={handleRefresh}
-            className="flex items-center gap-2 hover:bg-smartinvoice-soft-gray transition-all duration-300"
+            className="flex items-center gap-2"
           >
             <RefreshCw className="h-4 w-4" />
             Refresh
@@ -225,51 +153,16 @@ const ReviewInvoices = () => {
           />
         ) : (
           <div className="space-y-4">
-            <Card className="overflow-hidden shadow-md">
+            <Card className="overflow-hidden">
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <SortableHeader
-                        sortKey="vendor"
-                        currentSortColumn={sortColumn}
-                        sortDirection={sortDirection}
-                        onSort={handleSort}
-                      >
-                        Vendor
-                      </SortableHeader>
-                      <SortableHeader
-                        sortKey="invoiceDate"
-                        currentSortColumn={sortColumn}
-                        sortDirection={sortDirection}
-                        onSort={handleSort}
-                      >
-                        Invoice Date
-                      </SortableHeader>
-                      <SortableHeader
-                        sortKey="amount"
-                        currentSortColumn={sortColumn}
-                        sortDirection={sortDirection}
-                        onSort={handleSort}
-                      >
-                        Amount
-                      </SortableHeader>
-                      <SortableHeader
-                        sortKey="category"
-                        currentSortColumn={sortColumn}
-                        sortDirection={sortDirection}
-                        onSort={handleSort}
-                      >
-                        Category
-                      </SortableHeader>
-                      <SortableHeader
-                        sortKey="submittedBy"
-                        currentSortColumn={sortColumn}
-                        sortDirection={sortDirection}
-                        onSort={handleSort}
-                      >
-                        Submitted By
-                      </SortableHeader>
+                      <TableHead>Vendor</TableHead>
+                      <TableHead>Invoice Date</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Submitted By</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -281,60 +174,25 @@ const ReviewInvoices = () => {
                         <TableCell>{formatCurrency(invoice.amount, invoice.currency)}</TableCell>
                         <TableCell>{invoice.category}</TableCell>
                         <TableCell>{invoice.submittedBy}</TableCell>
-                        <TableCell>
+                        <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    size="icon"
-                                    onClick={() => openConfirmDialog(invoice)}
-                                    className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark text-white transition-all duration-300 shadow-sm hover:shadow-md h-9 w-9"
-                                  >
-                                    <Check className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Send for Approval</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    size="icon"
-                                    variant="outline"
-                                    onClick={() => openEditDialog(invoice)}
-                                    className="border-gray-300 hover:bg-smartinvoice-soft-gray transition-all duration-300 h-9 w-9"
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Edit Invoice</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    size="icon"
-                                    variant="outline"
-                                    onClick={() => openDeclineDialog(invoice.id)}
-                                    className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all duration-300 h-9 w-9"
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Decline Invoice</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                            <Button
+                              size="sm"
+                              onClick={() => handleSendForApproval(invoice.id)}
+                              className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark"
+                            >
+                              <Check className="h-4 w-4 mr-1" />
+                              Send for Approval
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openDeclineDialog(invoice.id)}
+                              className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+                            >
+                              <X className="h-4 w-4 mr-1" />
+                              Decline
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -384,23 +242,6 @@ const ReviewInvoices = () => {
         isOpen={isDeclineDialogOpen}
         onClose={() => setIsDeclineDialogOpen(false)}
         onConfirm={handleDeclineConfirm}
-      />
-      
-      <ConfirmationDialog
-        isOpen={isConfirmDialogOpen}
-        onClose={() => setIsConfirmDialogOpen(false)}
-        onConfirm={handleSendForApproval}
-        title="Send Invoice for Approval"
-        description={selectedInvoice ? `Are you sure you want to send the invoice from ${selectedInvoice.vendor} for ${formatCurrency(selectedInvoice.amount, selectedInvoice.currency)} for approval? This action cannot be undone.` : "Are you sure you want to send this invoice for approval?"}
-        confirmLabel="Send for Approval"
-        cancelLabel="Cancel"
-      />
-      
-      <EditInvoiceDialog
-        isOpen={isEditDialogOpen}
-        onClose={() => setIsEditDialogOpen(false)}
-        onSend={handleEditAndSend}
-        invoice={selectedInvoice}
       />
     </Layout>
   );
