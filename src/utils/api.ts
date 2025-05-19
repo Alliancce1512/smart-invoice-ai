@@ -1,3 +1,4 @@
+
 import { toast } from "sonner";
 
 // Function to get the setSessionExpired function from the AuthContext
@@ -272,24 +273,5 @@ export const declineInvoice = async (invoiceId: number, reason?: string): Promis
       toast.error("Failed to decline invoice. Please try again.");
     }
     throw error;
-  }
-};
-
-export const updateInvoice = async (invoiceId: number, updatedInvoice: any) => {
-  try {
-    // Simulate API call
-    console.log(`Updating invoice ${invoiceId}:`, updatedInvoice);
-    
-    // For demo purposes, we're just returning a success response
-    return {
-      status: 0,
-      message: "Invoice updated successfully"
-    };
-  } catch (error) {
-    console.error("Error updating invoice:", error);
-    return {
-      status: -1,
-      message: "Failed to update invoice"
-    };
   }
 };

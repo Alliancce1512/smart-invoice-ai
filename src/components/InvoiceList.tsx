@@ -1,7 +1,6 @@
-
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { CalendarIcon, DollarSignIcon, FileTextIcon, CheckIcon, XIcon, AlertTriangle, MessageSquare, ChevronDown, ChevronUp, FileX, ArrowUp, ArrowDown } from "lucide-react";
+import { CalendarIcon, DollarSignIcon, FileTextIcon, CheckIcon, XIcon, AlertTriangle, MessageSquare, ChevronDown, ChevronUp, FileX } from "lucide-react";
 import { format } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -27,11 +26,6 @@ interface InvoiceListProps {
 }
 
 const ITEMS_PER_PAGE = 10;
-
-type SortConfig = {
-  key: string;
-  direction: 'asc' | 'desc';
-};
 
 const formatCurrency = (amount: string | number, currency: string = "USD") => {
   if (!amount) return "-";
@@ -106,7 +100,6 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
 }) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
   
   const toggleRow = (id: string | number) => {
     setExpandedRows((prev) => ({
@@ -114,56 +107,6 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
       [id]: !prev[id],
     }));
   };
-  
-  const requestSort = (key: string) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    
-    setSortConfig({ key, direction });
-  };
-  
-  const getSortDirection = (key: string) => {
-    if (!sortConfig || sortConfig.key !== key) {
-      return null;
-    }
-    return sortConfig.direction;
-  };
-  
-  const sortedInvoices = React.useMemo(() => {
-    let sortableItems = [...invoices];
-    
-    if (sortConfig !== null) {
-      sortableItems.sort((a, b) => {
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
-        
-        // Handle different data types
-        if (sortConfig.key === 'amount') {
-          const aNum = parseFloat(aValue);
-          const bNum = parseFloat(bValue);
-          return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum;
-        } else if (sortConfig.key === 'invoiceDate') {
-          const aDate = new Date(aValue).getTime();
-          const bDate = new Date(bValue).getTime();
-          return sortConfig.direction === 'asc' ? aDate - bDate : bDate - aDate;
-        } else {
-          // String comparison
-          if (aValue < bValue) {
-            return sortConfig.direction === 'asc' ? -1 : 1;
-          }
-          if (aValue > bValue) {
-            return sortConfig.direction === 'asc' ? 1 : -1;
-          }
-        }
-        return 0;
-      });
-    }
-    
-    return sortableItems;
-  }, [invoices, sortConfig]);
   
   if (isLoading) {
     return (
@@ -192,22 +135,14 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
   }
 
   // Calculate pagination
-  const totalPages = Math.ceil(sortedInvoices.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(invoices.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedInvoices = sortedInvoices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const paginatedInvoices = invoices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     // Reset expanded rows when changing pages
     setExpandedRows({});
-  };
-
-  const SortIcon = ({ column }: { column: string }) => {
-    const direction = getSortDirection(column);
-    if (direction === null) {
-      return null;
-    }
-    return direction === 'asc' ? <ArrowUp size={16} className="ml-1" /> : <ArrowDown size={16} className="ml-1" />;
   };
 
   return (
@@ -217,46 +152,12 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead onClick={() => requestSort('vendor')} className="cursor-pointer">
-                  <div className="flex items-center">
-                    Vendor
-                    <SortIcon column="vendor" />
-                  </div>
-                </TableHead>
-                <TableHead onClick={() => requestSort('invoiceDate')} className="cursor-pointer">
-                  <div className="flex items-center">
-                    Invoice Date
-                    <SortIcon column="invoiceDate" />
-                  </div>
-                </TableHead>
-                <TableHead onClick={() => requestSort('amount')} className="cursor-pointer">
-                  <div className="flex items-center">
-                    Amount
-                    <SortIcon column="amount" />
-                  </div>
-                </TableHead>
-                <TableHead onClick={() => requestSort('category')} className="cursor-pointer">
-                  <div className="flex items-center">
-                    Category
-                    <SortIcon column="category" />
-                  </div>
-                </TableHead>
-                {showSubmittedBy && (
-                  <TableHead onClick={() => requestSort('submittedBy')} className="cursor-pointer">
-                    <div className="flex items-center">
-                      Submitted By
-                      <SortIcon column="submittedBy" />
-                    </div>
-                  </TableHead>
-                )}
-                {showApprovalStatus && (
-                  <TableHead onClick={() => requestSort('status')} className="cursor-pointer">
-                    <div className="flex items-center">
-                      Status
-                      <SortIcon column="status" />
-                    </div>
-                  </TableHead>
-                )}
+                <TableHead>Vendor</TableHead>
+                <TableHead>Invoice Date</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Category</TableHead>
+                {showSubmittedBy && <TableHead>Submitted By</TableHead>}
+                {showApprovalStatus && <TableHead>Status</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -265,9 +166,9 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
                   <TableRow
                     className={cn(
                       "cursor-pointer",
-                      (invoice.review_comment || invoice.approval_comment || invoice.decline_comment) && "border-b-0"
+                      (invoice.review_comment || invoice.approval_comment) && "border-b-0"
                     )}
-                    onClick={() => (invoice.review_comment || invoice.approval_comment || invoice.decline_comment) && toggleRow(invoice.id)}
+                    onClick={() => (invoice.review_comment || invoice.approval_comment) && toggleRow(invoice.id)}
                   >
                     <TableCell>
                       <div className="flex items-center">
@@ -294,7 +195,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
                         <div className="flex items-center justify-between">
                           <StatusBadge status={invoice.status || (invoice.approved ? "approved" : "for_approval")} />
                           
-                          {(invoice.review_comment || invoice.approval_comment || invoice.decline_comment) && (
+                          {(invoice.review_comment || invoice.approval_comment) && (
                             <button 
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -314,7 +215,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
                     )}
                   </TableRow>
                   
-                  {(invoice.review_comment || invoice.approval_comment || invoice.decline_comment) && (
+                  {(invoice.review_comment || invoice.approval_comment) && (
                     <TableRow className="bg-gray-50">
                       <TableCell colSpan={showSubmittedBy ? 6 : 5} className="p-0">
                         <Collapsible open={expandedRows[invoice.id]}>
@@ -335,15 +236,6 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
                                   <div>
                                     <span className="font-medium text-gray-700">Approval Comment:</span>{" "}
                                     <span className="text-gray-600">{invoice.approval_comment}</span>
-                                  </div>
-                                </div>
-                              )}
-                              {invoice.decline_comment && (
-                                <div className="flex items-start gap-2 text-sm">
-                                  <MessageSquare className="h-4 w-4 text-gray-500 mt-0.5" />
-                                  <div>
-                                    <span className="font-medium text-gray-700">Decline Reason:</span>{" "}
-                                    <span className="text-gray-600">{invoice.decline_comment}</span>
                                   </div>
                                 </div>
                               )}
