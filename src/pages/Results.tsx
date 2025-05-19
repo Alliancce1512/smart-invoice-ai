@@ -10,6 +10,7 @@ import { ArrowLeft, Edit, FileJson } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import JsonViewDialog from "@/components/JsonViewDialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const Results = () => {
   const [invoiceData, setInvoiceData] = useState<any>(null);
@@ -99,16 +100,6 @@ const Results = () => {
             Back
           </Button>
           <h1 className="text-3xl font-bold mb-0 ml-2 dark:text-white">Invoice Results</h1>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="ml-auto" 
-            onClick={() => setShowJsonView(true)}
-          >
-            <FileJson className="h-4 w-4 mr-2" />
-            JSON
-          </Button>
         </div>
         <p className="text-gray-600 mb-8 dark:text-gray-300">
           Review the extracted information before submitting
@@ -119,15 +110,45 @@ const Results = () => {
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow dark:shadow-gray-900/30 dark:border dark:border-gray-700 relative">
               <div className="flex justify-between items-start mb-4">
                 <h2 className="text-xl font-semibold dark:text-white">Invoice Details</h2>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="p-1 h-auto text-gray-500 hover:text-smartinvoice-purple dark:text-gray-400"
-                  onClick={handleEditInvoice}
-                >
-                  <Edit className="h-4 w-4" />
-                  <span className="sr-only">Edit invoice</span>
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="p-2 h-auto text-gray-500 hover:text-smartinvoice-purple dark:text-gray-400"
+                          onClick={() => setShowJsonView(true)}
+                        >
+                          <FileJson className="h-4 w-4" />
+                          <span className="sr-only">View JSON</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>View JSON</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="p-2 h-auto text-gray-500 hover:text-smartinvoice-purple dark:text-gray-400"
+                          onClick={handleEditInvoice}
+                        >
+                          <Edit className="h-4 w-4" />
+                          <span className="sr-only">Edit invoice</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Edit</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </div>
               <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
