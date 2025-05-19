@@ -1,24 +1,71 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, Upload, FileText, TrendingUp, Clock, FileCheck, Star, Zap, Check, CheckCheck } from "lucide-react";
+import { CheckCircle, Upload, FileText, TrendingUp, Clock, FileCheck, Star, Zap, Check, CheckCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SuccessMessage {
   vendor: string;
   action: 'submitted' | 'approved';
 }
 
+// Define a common interface for action cards
+interface ActionCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  buttonText: string;
+  buttonVariant?: "default" | "outline";
+  onClick: () => void;
+}
+
+const ActionCard: React.FC<ActionCardProps> = ({ 
+  icon, 
+  title, 
+  description, 
+  buttonText, 
+  buttonVariant = "outline", 
+  onClick 
+}) => (
+  <Card className="group hover-scale border-border hover:border-smartinvoice-purple transition-all duration-300 dark:hover:border-smartinvoice-purple min-w-[250px] md:min-w-[280px] flex flex-col">
+    <CardHeader className="flex flex-row items-center space-x-4 pb-2">
+      <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center">
+        {icon}
+      </div>
+      <div className="space-y-1">
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </div>
+    </CardHeader>
+    <CardContent className="text-sm text-muted-foreground flex-grow">
+      {description}
+    </CardContent>
+    <CardFooter>
+      <Button 
+        onClick={onClick}
+        className={`w-full ${buttonVariant === "default" ? "bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark text-white" : "bg-card hover:bg-muted text-foreground border border-input"}`}
+        variant={buttonVariant}
+      >
+        {buttonText}
+      </Button>
+    </CardFooter>
+  </Card>
+);
+
 const Index = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successMessage, setSuccessMessage] = useState<SuccessMessage | null>(null);
   const navigate = useNavigate();
   const { accessConfig } = useAuth();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showLeftScroll, setShowLeftScroll] = useState(false);
+  const [showRightScroll, setShowRightScroll] = useState(true);
   
   useEffect(() => {
     // Check for success message in session storage
@@ -34,12 +81,88 @@ const Index = () => {
         console.error("Failed to parse success message:", error);
       }
     }
+
+    // Check if scroll buttons should be visible
+    checkScrollButtons();
+    window.addEventListener('resize', checkScrollButtons);
+    return () => window.removeEventListener('resize', checkScrollButtons);
   }, []);
+
+  const checkScrollButtons = () => {
+    if (!scrollContainerRef.current) return;
+    
+    const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+    setShowLeftScroll(scrollLeft > 0);
+    setShowRightScroll(scrollLeft < scrollWidth - clientWidth - 10); // 10px buffer
+  };
+
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (!scrollContainerRef.current) return;
+    
+    const scrollAmount = direction === 'left' ? -300 : 300;
+    scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    
+    // Update scroll button visibility after scrolling
+    setTimeout(checkScrollButtons, 300);
+  };
   
   const handleProcessAnother = () => {
     setShowSuccessDialog(false);
     navigate("/upload");
   };
+
+  // Action card data with role-based filtering applied later
+  const actionCards = [
+    {
+      icon: <Upload className="h-6 w-6 text-smartinvoice-purple" />,
+      title: "Process Invoice",
+      description: "Upload and extract data",
+      buttonText: "Upload Now",
+      buttonVariant: "default" as const,
+      onClick: () => navigate("/upload"),
+      requiredRole: null, // Available to all
+    },
+    {
+      icon: <FileText className="h-6 w-6 text-smartinvoice-purple" />,
+      title: "View Submissions",
+      description: "Track your invoices",
+      buttonText: "View Invoices",
+      onClick: () => navigate("/requests"),
+      requiredRole: null, // Available to all
+    },
+    {
+      icon: <FileCheck className="h-6 w-6 text-smartinvoice-purple" />,
+      title: "Start Reviewing",
+      description: "Review invoices & send for approval",
+      buttonText: "Review Now",
+      onClick: () => navigate("/review"),
+      requiredRole: "canReviewInvoices",
+    },
+    {
+      icon: <Check className="h-6 w-6 text-smartinvoice-purple" />,
+      title: "Approve Invoices",
+      description: "Final invoice approval",
+      buttonText: "Approve Now",
+      onClick: () => navigate("/approve"),
+      requiredRole: "canApproveInvoices",
+    },
+    {
+      icon: <CheckCheck className="h-6 w-6 text-smartinvoice-purple" />,
+      title: "Approved Requests",
+      description: "View approved invoices",
+      buttonText: "View Approved",
+      onClick: () => navigate("/approved"),
+      requiredRole: null, // Available to all
+    }
+  ];
+  
+  // Filter action cards based on user permissions
+  const filteredActionCards = actionCards.filter(card => {
+    if (card.requiredRole === null) return true;
+    if (card.requiredRole === "canReviewInvoices" && accessConfig?.canReviewInvoices) return true;
+    if (card.requiredRole === "canApproveInvoices" && accessConfig?.canApproveInvoices) return true;
+    return false;
+  });
   
   return (
     <Layout>
@@ -54,130 +177,50 @@ const Index = () => {
           </p>
         </div>
 
-        {/* Quick action cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mx-auto justify-center">
-          <Card className="group hover-scale border-border hover:border-smartinvoice-purple transition-all duration-300 dark:hover:border-smartinvoice-purple">
-            <CardHeader className="flex flex-row items-center space-x-4 pb-2">
-              <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center">
-                <Upload className="h-6 w-6 text-smartinvoice-purple" />
-              </div>
-              <div className="space-y-1">
-                <CardTitle>Process Invoice</CardTitle>
-                <CardDescription>Upload and extract data</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              Upload your invoice and let our AI extract all important information automatically.
-            </CardContent>
-            <CardFooter>
-              <Button 
-                onClick={() => navigate("/upload")}
-                className="w-full bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark text-white"
-              >
-                Upload Now
-              </Button>
-            </CardFooter>
-          </Card>
-
-          <Card className="group hover-scale border-border hover:border-smartinvoice-purple transition-all duration-300 dark:hover:border-smartinvoice-purple">
-            <CardHeader className="flex flex-row items-center space-x-4 pb-2">
-              <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center">
-                <FileText className="h-6 w-6 text-smartinvoice-purple" />
-              </div>
-              <div className="space-y-1">
-                <CardTitle>View Submissions</CardTitle>
-                <CardDescription>Track your invoices</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              View all your submitted invoices and check their current approval status.
-            </CardContent>
-            <CardFooter>
-              <Button 
-                onClick={() => navigate("/requests")}
-                className="w-full bg-card hover:bg-muted text-foreground border border-input"
-                variant="outline"
-              >
-                View Invoices
-              </Button>
-            </CardFooter>
-          </Card>
-
-          {accessConfig?.canApproveInvoices && (
-            <Card className="group hover-scale border-border hover:border-smartinvoice-purple transition-all duration-300 dark:hover:border-smartinvoice-purple">
-              <CardHeader className="flex flex-row items-center space-x-4 pb-2">
-                <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center">
-                  <FileCheck className="h-6 w-6 text-smartinvoice-purple" />
-                </div>
-                <div className="space-y-1">
-                  <CardTitle>Start Reviewing</CardTitle>
-                  <CardDescription>Review invoices & send for approval</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                Review invoices and send them for final approval from authorized approvers.
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  onClick={() => navigate("/review")}
-                  className="w-full bg-card hover:bg-muted text-foreground border border-input"
-                  variant="outline"
-                >
-                  Review Now
-                </Button>
-              </CardFooter>
-            </Card>
+        {/* Quick action cards - now horizontally scrollable */}
+        <div className="relative">
+          {showLeftScroll && (
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm border-gray-200 shadow-md hidden md:flex"
+              onClick={() => handleScroll('left')}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
           )}
           
-          {accessConfig?.canApproveInvoices && (
-            <Card className="group hover-scale border-border hover:border-smartinvoice-purple transition-all duration-300 dark:hover:border-smartinvoice-purple">
-              <CardHeader className="flex flex-row items-center space-x-4 pb-2">
-                <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center">
-                  <Check className="h-6 w-6 text-smartinvoice-purple" />
+          <div className="overflow-hidden">
+            <div 
+              ref={scrollContainerRef} 
+              className="flex gap-6 pb-4 overflow-x-auto scrollbar-none snap-x" 
+              onScroll={checkScrollButtons}
+            >
+              {filteredActionCards.map((card, index) => (
+                <div key={index} className="snap-start flex-shrink-0">
+                  <ActionCard 
+                    icon={card.icon}
+                    title={card.title}
+                    description={card.description}
+                    buttonText={card.buttonText}
+                    buttonVariant={card.buttonVariant}
+                    onClick={card.onClick}
+                  />
                 </div>
-                <div className="space-y-1">
-                  <CardTitle>Approve Invoices</CardTitle>
-                  <CardDescription>Final invoice approval</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                Give final approval for invoices that have been reviewed and are ready for processing.
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  onClick={() => navigate("/approve")}
-                  className="w-full bg-card hover:bg-muted text-foreground border border-input"
-                  variant="outline"
-                >
-                  Approve Now
-                </Button>
-              </CardFooter>
-            </Card>
-          )}
+              ))}
+            </div>
+          </div>
           
-          <Card className="group hover-scale border-border hover:border-smartinvoice-purple transition-all duration-300 dark:hover:border-smartinvoice-purple">
-            <CardHeader className="flex flex-row items-center space-x-4 pb-2">
-              <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center">
-                <CheckCheck className="h-6 w-6 text-smartinvoice-purple" />
-              </div>
-              <div className="space-y-1">
-                <CardTitle>Approved Requests</CardTitle>
-                <CardDescription>View approved invoices</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              Review all invoices that have been fully approved and are ready for payment.
-            </CardContent>
-            <CardFooter>
-              <Button 
-                onClick={() => navigate("/approved")}
-                className="w-full bg-card hover:bg-muted text-foreground border border-input"
-                variant="outline"
-              >
-                View Approved
-              </Button>
-            </CardFooter>
-          </Card>
+          {showRightScroll && (
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm border-gray-200 shadow-md hidden md:flex"
+              onClick={() => handleScroll('right')}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         
         {/* Features section */}
@@ -335,7 +378,7 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Success dialog after submission - with switched button order */}
+      {/* Success dialog after submission */}
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <DialogContent className="sm:max-w-md dark:bg-gray-800 dark:border-gray-700">
           <DialogHeader>

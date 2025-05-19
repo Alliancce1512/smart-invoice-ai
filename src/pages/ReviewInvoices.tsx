@@ -22,6 +22,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import SortableHeader from "@/components/SortableHeader";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -280,34 +281,60 @@ const ReviewInvoices = () => {
                         <TableCell>{formatCurrency(invoice.amount, invoice.currency)}</TableCell>
                         <TableCell>{invoice.category}</TableCell>
                         <TableCell>{invoice.submittedBy}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell>
                           <div className="flex justify-end gap-2">
-                            <Button
-                              size="sm"
-                              onClick={() => openConfirmDialog(invoice)}
-                              className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark text-white font-medium transition-all duration-300 shadow-sm hover:shadow-md"
-                            >
-                              <Check className="h-4 w-4 mr-1" />
-                              Send for Approval
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => openEditDialog(invoice)}
-                              className="border-gray-300 hover:bg-smartinvoice-soft-gray transition-all duration-300"
-                            >
-                              <Edit className="h-4 w-4 mr-1" />
-                              Edit
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => openDeclineDialog(invoice.id)}
-                              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all duration-300"
-                            >
-                              <X className="h-4 w-4 mr-1" />
-                              Decline
-                            </Button>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon"
+                                    onClick={() => openConfirmDialog(invoice)}
+                                    className="bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark text-white transition-all duration-300 shadow-sm hover:shadow-md h-9 w-9"
+                                  >
+                                    <Check className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Send for Approval</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon"
+                                    variant="outline"
+                                    onClick={() => openEditDialog(invoice)}
+                                    className="border-gray-300 hover:bg-smartinvoice-soft-gray transition-all duration-300 h-9 w-9"
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Edit Invoice</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon"
+                                    variant="outline"
+                                    onClick={() => openDeclineDialog(invoice.id)}
+                                    className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all duration-300 h-9 w-9"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Decline Invoice</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </TableCell>
                       </TableRow>
