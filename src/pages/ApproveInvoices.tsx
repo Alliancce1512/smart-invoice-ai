@@ -31,6 +31,7 @@ interface Invoice {
   approved: boolean;
   submittedBy: string;
   submittedAt: string;
+  reviewedBy?: string;
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -171,6 +172,7 @@ const ApproveInvoices = () => {
                       <TableHead>Amount</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead>Submitted By</TableHead>
+                      <TableHead>Reviewed By</TableHead>
                       <TableHead className="w-[100px]">Action</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -186,6 +188,7 @@ const ApproveInvoices = () => {
                         </TableCell>
                         <TableCell>{invoice.category || 'N/A'}</TableCell>
                         <TableCell>{invoice.submittedBy || 'N/A'}</TableCell>
+                        <TableCell>{invoice.reviewedBy || 'N/A'}</TableCell>
                         <TableCell>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>

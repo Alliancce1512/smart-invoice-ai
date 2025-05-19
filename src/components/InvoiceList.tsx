@@ -23,6 +23,8 @@ interface InvoiceListProps {
   invoices: any[];
   showApprovalStatus?: boolean;
   showSubmittedBy?: boolean;
+  showApprovedBy?: boolean;  // New prop for "Approved By" column
+  showReviewedBy?: boolean;  // New prop for "Reviewed By" column
   isLoading: boolean;
   onRefresh?: () => void;
 }
@@ -97,6 +99,8 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
   invoices, 
   showApprovalStatus = false, 
   showSubmittedBy = false,
+  showApprovedBy = false,
+  showReviewedBy = false,
   isLoading, 
   onRefresh
 }) => {
@@ -139,6 +143,9 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
         } else if (sortColumn === "amount") {
           valA = parseFloat(valA) || 0;
           valB = parseFloat(valB) || 0;
+        } else if (sortColumn === "status") {
+          valA = a.status || (a.approved ? "approved" : a.declined ? "declined" : "for_approval");
+          valB = b.status || (b.approved ? "approved" : b.declined ? "declined" : "for_approval");
         }
         
         if (valA < valB) return sortDirection === "asc" ? -1 : 1;
@@ -249,6 +256,26 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
                     Submitted By
                   </SortableHeader>
                 )}
+                {showReviewedBy && (
+                  <SortableHeader
+                    sortKey="reviewedBy"
+                    currentSortColumn={sortColumn}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  >
+                    Reviewed By
+                  </SortableHeader>
+                )}
+                {showApprovedBy && (
+                  <SortableHeader
+                    sortKey="approvedBy"
+                    currentSortColumn={sortColumn}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  >
+                    Approved By
+                  </SortableHeader>
+                )}
                 {showApprovalStatus && (
                   <TableHead>Status</TableHead>
                 )}
@@ -284,6 +311,8 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
                     </TableCell>
                     <TableCell>{invoice.category}</TableCell>
                     {showSubmittedBy && <TableCell>{invoice.submittedBy}</TableCell>}
+                    {showReviewedBy && <TableCell>{invoice.reviewedBy || 'N/A'}</TableCell>}
+                    {showApprovedBy && <TableCell>{invoice.approvedBy || 'N/A'}</TableCell>}
                     {showApprovalStatus && (
                       <TableCell>
                         <div className="flex items-center justify-between">
@@ -311,7 +340,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
                   
                   {(invoice.review_comment || invoice.approval_comment) && (
                     <TableRow className="bg-gray-50">
-                      <TableCell colSpan={showSubmittedBy ? 6 : 5} className="p-0">
+                      <TableCell colSpan={showSubmittedBy && (showApprovedBy || showReviewedBy) ? 7 : (showSubmittedBy || showApprovedBy || showReviewedBy) ? 6 : 5} className="p-0">
                         <Collapsible open={expandedRows[invoice.id]}>
                           <CollapsibleContent>
                             <div className="px-4 py-2 space-y-2">
