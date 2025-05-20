@@ -7,32 +7,14 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { format, parseISO } from "date-fns";
-import { Button } from "./ui/button";
+import { formatDate, formatDateTime, formatCurrency } from "@/utils/formatters";
+import StatusBadge from "./invoice/StatusBadge";
 
 interface InvoiceDetailsDialogProps {
   invoice: any;
   isOpen: boolean;
   onClose: () => void;
 }
-
-const formatDate = (dateString: string | null) => {
-  if (!dateString) return "Not available";
-  try {
-    return format(parseISO(dateString), "dd.MM.yyyy");
-  } catch (error) {
-    return dateString || "Not available";
-  }
-};
-
-const formatDateTime = (dateString: string | null) => {
-  if (!dateString) return "Not available";
-  try {
-    return format(parseISO(dateString), "dd.MM.yyyy HH:mm");
-  } catch (error) {
-    return dateString || "Not available";
-  }
-};
 
 const InvoiceDetailsDialog: React.FC<InvoiceDetailsDialogProps> = ({
   invoice,
@@ -41,56 +23,7 @@ const InvoiceDetailsDialog: React.FC<InvoiceDetailsDialogProps> = ({
 }) => {
   if (!invoice) return null;
 
-  const formatCurrency = (amount: string | number, currency: string = "USD") => {
-    if (!amount) return "Not available";
-    
-    try {
-      const numericAmount = typeof amount === "string" ? parseFloat(amount) : amount;
-      if (isNaN(numericAmount)) return "Not available";
-      
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: currency || "USD",
-      }).format(numericAmount);
-    } catch (error) {
-      return `${currency || "$"}${parseFloat(amount as string).toFixed(2)}`;
-    }
-  };
-
-  const renderStatusBadge = (status: string) => {
-    switch (status) {
-      case "for_review":
-        return (
-          <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-            Awaiting Review
-          </span>
-        );
-      case "for_approval":
-        return (
-          <span className="px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-800">
-            Awaiting Approval
-          </span>
-        );
-      case "approved":
-        return (
-          <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-            Approved
-          </span>
-        );
-      case "declined":
-        return (
-          <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-            Declined
-          </span>
-        );
-      default:
-        return (
-          <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-            {status || "Unknown"}
-          </span>
-        );
-    }
-  };
+  const renderStatusBadge = (status: string) => <StatusBadge status={status} />;
 
   const renderFieldRow = (label: string, value: React.ReactNode, highlight: boolean = false) => (
     <div className={`py-3 ${highlight ? "bg-gray-50" : ""} border-b border-gray-100`}>
