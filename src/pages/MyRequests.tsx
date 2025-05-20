@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getUserInvoices } from "@/utils/api";
 import Layout from "@/components/Layout";
@@ -8,9 +8,11 @@ import InvoiceList from "@/components/InvoiceList";
 import { useAuth } from "@/contexts/AuthContext";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import InvoiceDetailsDialog from "@/components/InvoiceDetailsDialog";
 
 const MyRequests: React.FC = () => {
   const { userId } = useAuth();
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["user-invoices", userId],
@@ -41,6 +43,14 @@ const MyRequests: React.FC = () => {
     toast.info("Refreshing invoices...");
   };
 
+  const handleInvoiceClick = (invoice: any) => {
+    setSelectedInvoice(invoice);
+  };
+
+  const handleCloseDialog = () => {
+    setSelectedInvoice(null);
+  };
+
   return (
     <Layout>
       <div className="container mx-auto py-6">
@@ -61,7 +71,16 @@ const MyRequests: React.FC = () => {
           showApprovalStatus={true}
           isLoading={isLoading}
           onRefresh={handleRefresh}
+          onInvoiceClick={handleInvoiceClick}
         />
+
+        {selectedInvoice && (
+          <InvoiceDetailsDialog 
+            invoice={selectedInvoice} 
+            isOpen={!!selectedInvoice} 
+            onClose={handleCloseDialog} 
+          />
+        )}
       </div>
     </Layout>
   );

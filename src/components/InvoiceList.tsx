@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { CalendarIcon, DollarSignIcon, FileTextIcon, CheckIcon, XIcon, AlertTriangle, MessageSquare, ChevronDown, ChevronUp, FileX } from "lucide-react";
@@ -27,6 +26,7 @@ interface InvoiceListProps {
   showReviewedBy?: boolean;  // New prop for "Reviewed By" column
   isLoading: boolean;
   onRefresh?: () => void;
+  onInvoiceClick?: (invoice: any) => void; // New prop for handling invoice clicks
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -102,7 +102,8 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
   showApprovedBy = false,
   showReviewedBy = false,
   isLoading, 
-  onRefresh
+  onRefresh,
+  onInvoiceClick
 }) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -180,6 +181,12 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
     });
     setExpandedRows(prev => ({...prev, ...newExpandedRows}));
   }, [paginatedInvoices, currentPage]);
+
+  const handleRowClick = (invoice: any) => {
+    if (onInvoiceClick) {
+      onInvoiceClick(invoice);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -286,10 +293,16 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
                 <React.Fragment key={invoice.id}>
                   <TableRow
                     className={cn(
-                      "cursor-pointer",
+                      "cursor-pointer hover:bg-gray-50",
                       (invoice.review_comment || invoice.approval_comment) && "border-b-0"
                     )}
-                    onClick={() => (invoice.review_comment || invoice.approval_comment) && toggleRow(invoice.id)}
+                    onClick={() => {
+                      if (onInvoiceClick) {
+                        handleRowClick(invoice);
+                      } else if ((invoice.review_comment || invoice.approval_comment)) {
+                        toggleRow(invoice.id);
+                      }
+                    }}
                   >
                     <TableCell>
                       <div className="flex items-center">
