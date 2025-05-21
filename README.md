@@ -42,7 +42,7 @@ Note: The `admin` account has access to all the platform features (Upload, Revie
 
 | Layer      | Technology                     |
 |------------|--------------------------------|
-| Frontend   | [Vite](https://vitejs.dev/), [React](https://reactjs.org/), [Tailwind CSS](https://tailwindcss.com/), [ShadCN UI](https://ui.shadcn.com/) |
+| Frontend   | [TypeScript](https://www.typescriptlang.org/), [React](https://reactjs.org/), [Vite](https://vitejs.dev/), [Tailwind CSS](https://tailwindcss.com/) |
 | Backend    | [n8n](https://n8n.io/) — No-code backend logic with PostgreSQL integration |
 | AI Agent   | [Lovable.dev](https://lovable.dev/) — LLM prompt-based frontend logic |
 | Database   | [PostgreSQL](https://www.postgresql.org/) |
