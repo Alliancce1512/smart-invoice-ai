@@ -60,6 +60,7 @@ Note: The `admin` account has access to all the platform features (Upload, Revie
 - Add search/filtering for tables
 - Notifications for status updates
 - Multi-language support for the platform
+- Explore embedding-based retrieval techniques to support future document search and classification features.
 - Integrate an AI-powered chatbot that can assist users with:
   - Explaining invoice statuses and actions
   - Guiding new users through the platform
