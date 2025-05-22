@@ -1,14 +1,16 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { FileUp, FileText, ListChecks, Check, CheckCheck, ArrowLeft, ArrowRight } from "lucide-react";
+import { FileUp, FileText, ListChecks, Check, CheckCheck } from "lucide-react";
 import ActionCard from "./ActionCard";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const QuickActions: React.FC = () => {
   const navigate = useNavigate();
   const { accessConfig } = useAuth();
+  const isMobile = useIsMobile();
   
   // Action card data with role-based filtering applied later
   const actionCards = [
@@ -66,17 +68,18 @@ export const QuickActions: React.FC = () => {
   return (
     <div className="px-4 sm:px-6 py-6">
       <div className="relative">
-        {/* Carousel for horizontal scrolling */}
         <Carousel
           opts={{
             align: "start",
-            loop: true,
           }}
           className="w-full"
         >
           <CarouselContent className="-ml-6">
             {filteredActionCards.map((card, index) => (
-              <CarouselItem key={index} className="pl-6 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+              <CarouselItem 
+                key={index} 
+                className="pl-6 basis-full sm:basis-1/2 md:basis-1/3"
+              >
                 <div className="h-full">
                   <ActionCard 
                     icon={card.icon}
@@ -91,12 +94,10 @@ export const QuickActions: React.FC = () => {
             ))}
           </CarouselContent>
           
-          <div className="flex justify-center mt-4 gap-4">
+          <div className="flex justify-center mt-6 gap-4">
             <CarouselPrevious className="static transform-none inline-flex bg-background border-input hover:bg-accent hover:text-accent-foreground shadow-sm" />
             <CarouselNext className="static transform-none inline-flex bg-background border-input hover:bg-accent hover:text-accent-foreground shadow-sm" />
           </div>
-          
-          {/* Mobile Navigation Buttons - no longer needed as we moved the main buttons to the center */}
         </Carousel>
       </div>
     </div>

@@ -21,18 +21,18 @@ export const ActionCard: React.FC<ActionCardProps> = ({
   onClick 
 }) => (
   <Card className="group h-full transform transition-all duration-300 shadow-sm hover:shadow-md border-border hover:border-smartinvoice-purple dark:hover:border-smartinvoice-purple flex flex-col w-full">
-    <CardHeader className="flex flex-row items-center space-x-4 pb-2 p-4">
-      <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center group-hover:bg-smartinvoice-purple/10 transition-colors">
+    <CardHeader className="flex flex-row items-center space-x-4 pb-2 p-5">
+      <div className="h-14 w-14 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center group-hover:bg-smartinvoice-purple/10 transition-colors">
         {icon}
       </div>
       <div>
         <CardTitle className="text-base sm:text-lg">{title}</CardTitle>
       </div>
     </CardHeader>
-    <CardContent className="text-xs sm:text-sm text-muted-foreground flex-grow px-4 py-2">
+    <CardContent className="text-sm text-muted-foreground flex-grow px-5 py-2">
       {description}
     </CardContent>
-    <CardFooter className="p-4 pt-2">
+    <CardFooter className="p-5 pt-3">
       <Button 
         onClick={onClick}
         className={`w-full ${buttonVariant === "default" ? "bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark text-white" : "bg-card hover:bg-muted text-foreground border border-input"}`}
