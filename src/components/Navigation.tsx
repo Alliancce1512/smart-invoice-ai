@@ -41,7 +41,7 @@ const Navigation: React.FC = () => {
     }
   ];
 
-  // Add Review Invoices tab for users with canReviewInvoices permission (role 1 or 3)
+  // Add Review Invoices tab for users with canReviewInvoices permission
   if (accessConfig?.canReviewInvoices) {
     navItems.push({
       to: "/review",
@@ -70,9 +70,9 @@ const Navigation: React.FC = () => {
   }
 
   return (
-    <nav className="bg-card shadow-sm sticky top-0 z-10 dark:bg-gray-800 dark:border-b dark:border-gray-700">
+    <nav className="bg-card shadow-sm sticky top-16 z-10 dark:bg-gray-800 dark:border-b dark:border-gray-700">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-12">
           {/* Mobile menu button */}
           <div className="block md:hidden">
             <Button

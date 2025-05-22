@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle, Upload, FileText, TrendingUp, Clock, FileCheck, Star, Zap, Check, CheckCheck, Activity, FileUp, ListChecks } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ScrollArea, HorizontalScrollArea } from "@/components/ui/scroll-area";
-import { formatDateTime } from "@/utils/formatters";
+import { formatDateTime, formatTimeElapsed } from "@/utils/formatters";
 
 interface SuccessMessage {
   vendor: string;
@@ -34,7 +34,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
   buttonVariant = "outline", 
   onClick 
 }) => (
-  <Card className="group hover:scale-[1.02] border-border hover:border-smartinvoice-purple transition-all duration-300 hover:shadow-lg dark:hover:border-smartinvoice-purple min-w-[250px] md:min-w-[280px] flex flex-col">
+  <Card className="group hover:scale-[1.02] border-border hover:border-smartinvoice-purple transition-all duration-300 shadow-sm hover:shadow-md dark:hover:border-smartinvoice-purple min-w-[250px] md:min-w-[280px] flex flex-col">
     <CardHeader className="flex flex-row items-center space-x-4 pb-2">
       <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center group-hover:bg-smartinvoice-purple/10 transition-colors">
         {icon}
@@ -178,17 +178,14 @@ const Index = () => {
   
   return (
     <Layout>
-      <div className="w-full max-w-5xl mx-auto py-8 space-y-12">
-        {/* Hero section with decorative background */}
-        <div className="text-center mb-12 relative py-12 px-4 rounded-2xl overflow-hidden">
+      <div className="w-full max-w-5xl mx-auto py-4 space-y-8">
+        {/* Subtitle/tagline section with decorative background */}
+        <div className="text-center mb-6 relative py-6 px-4 rounded-2xl overflow-hidden">
           {/* Decorative gradient background */}
           <div className="absolute inset-0 bg-gradient-to-br from-smartinvoice-soft-gray/50 to-background z-0 opacity-70"></div>
           
           {/* Content */}
           <div className="relative z-10">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-foreground tracking-tight">
-              Welcome to <span className="text-smartinvoice-purple">SmartInvoice AI</span>
-            </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Automate your invoice processing with powerful AI recognition
             </p>
@@ -197,8 +194,8 @@ const Index = () => {
 
         {/* Quick action cards - horizontally scrollable with snap */}
         <div className="relative">
-          <HorizontalScrollArea className="py-4">
-            <div className="flex gap-6 snap-x snap-mandatory px-1">
+          <HorizontalScrollArea className="py-2">
+            <div className="flex gap-5 snap-x snap-mandatory px-1">
               {filteredActionCards.map((card, index) => (
                 <div key={index} className="snap-center flex-shrink-0">
                   <ActionCard 
@@ -216,8 +213,8 @@ const Index = () => {
         </div>
         
         {/* Recent Activity section */}
-        <div className="pt-6">
-          <div className="mb-6">
+        <div className="pt-3">
+          <div className="mb-4">
             <h2 className="text-2xl font-semibold mb-2">Recent Activity</h2>
             <p className="text-muted-foreground">Your latest invoice processing activities</p>
           </div>
@@ -245,7 +242,7 @@ const Index = () => {
         </div>
         
         {/* Features section with improved visuals */}
-        <div className="pt-6">
+        <div className="pt-3">
           <Tabs defaultValue="features" className="w-full">
             <TabsList className="grid w-full md:w-auto md:inline-flex grid-cols-2 md:grid-cols-none h-auto">
               <TabsTrigger value="features" className="flex items-center space-x-2">
@@ -266,7 +263,7 @@ const Index = () => {
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="features" className="mt-6">
+            <TabsContent value="features" className="mt-4">
               <Card className="border shadow-md hover:shadow-lg transition-shadow">
                 <CardHeader className="bg-gradient-to-r from-smartinvoice-soft-gray/30 to-background border-b">
                   <CardTitle>Key Features</CardTitle>
@@ -315,7 +312,7 @@ const Index = () => {
               </Card>
             </TabsContent>
             
-            <TabsContent value="benefits" className="mt-6">
+            <TabsContent value="benefits" className="mt-4">
               <Card className="border shadow-md hover:shadow-lg transition-shadow">
                 <CardHeader className="bg-gradient-to-r from-green-50 to-background border-b dark:from-green-950/20 dark:to-background">
                   <CardTitle>Business Benefits</CardTitle>
@@ -346,7 +343,7 @@ const Index = () => {
               </Card>
             </TabsContent>
             
-            <TabsContent value="stats" className="mt-6">
+            <TabsContent value="stats" className="mt-4">
               <Card className="border shadow-md hover:shadow-lg transition-shadow">
                 <CardHeader className="bg-gradient-to-r from-blue-50/50 to-background border-b dark:from-blue-950/20 dark:to-background">
                   <CardTitle>System Statistics</CardTitle>
@@ -371,7 +368,7 @@ const Index = () => {
               </Card>
             </TabsContent>
             
-            <TabsContent value="recent" className="mt-6">
+            <TabsContent value="recent" className="mt-4">
               <Card className="border shadow-md hover:shadow-lg transition-shadow">
                 <CardHeader className="bg-gradient-to-r from-purple-50/50 to-background border-b dark:from-purple-950/20 dark:to-background">
                   <CardTitle>Recent Updates</CardTitle>
