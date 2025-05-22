@@ -193,9 +193,9 @@ const Index = () => {
               : 'opacity-0 translate-y-6'
           }`}
         >
-          <div className="py-6 px-6 rounded-2xl overflow-hidden">
-            {/* Enhanced background with stronger visibility */}
-            <div className="absolute inset-0 bg-gradient-to-br from-smartinvoice-purple/20 via-smartinvoice-soft-gray/50 to-background/90 backdrop-blur-md z-0 border border-smartinvoice-purple/20 shadow-lg rounded-2xl dark:from-smartinvoice-purple/30 dark:via-gray-800/60 dark:to-gray-900/50 dark:border-smartinvoice-purple/30"></div>
+          <div className="py-6 px-6 rounded-2xl overflow-hidden card-shadow">
+            {/* Enhanced background with stronger visibility and matching shadow style */}
+            <div className="absolute inset-0 bg-gradient-to-br from-smartinvoice-purple/20 via-smartinvoice-soft-gray/50 to-background/90 backdrop-blur-md z-0 border border-border shadow-md hover:shadow-lg transition-shadow rounded-2xl dark:from-smartinvoice-purple/30 dark:via-gray-800/60 dark:to-gray-900/50 dark:border-gray-700"></div>
             
             {/* Content with gradient text animation */}
             <div className="relative z-10">
