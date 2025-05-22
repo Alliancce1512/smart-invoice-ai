@@ -129,6 +129,14 @@ export default {
 						transform: "scale(1)",
 						opacity: "1"
 					}
+				},
+				'gradient-x': {
+					'0%, 100%': { 
+						backgroundPosition: '0% 50%' 
+					},
+					'50%': { 
+						backgroundPosition: '100% 50%' 
+					},
 				}
 			},
 			animation: {
@@ -137,6 +145,7 @@ export default {
 				'fade-in': 'fade-in 0.3s ease-out',
 				'fade-out': 'fade-out 0.3s ease-out',
 				'scale-in': 'scale-in 0.2s ease-out',
+				'gradient-x': 'gradient-x 8s ease infinite'
 			}
 		}
 	},

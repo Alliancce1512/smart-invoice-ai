@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -184,7 +185,7 @@ const Index = () => {
   return (
     <Layout>
       <div className="w-full max-w-5xl mx-auto py-4 space-y-6">
-        {/* Enhanced subtitle/tagline section with animation and backdrop blur */}
+        {/* Enhanced subtitle/tagline section with animation, backdrop blur and gradient text */}
         <div 
           className={`text-center mb-4 relative overflow-hidden transform transition-all duration-700 ease-out ${
             animateSubtitle 
@@ -193,12 +194,12 @@ const Index = () => {
           }`}
         >
           <div className="py-6 px-6 rounded-2xl overflow-hidden">
-            {/* Decorative background with blur */}
-            <div className="absolute inset-0 bg-gradient-to-br from-smartinvoice-purple/5 via-smartinvoice-soft-gray/30 to-background backdrop-blur-sm z-0 border border-background/10 shadow-sm rounded-2xl dark:from-smartinvoice-purple/10 dark:via-gray-800/40 dark:to-gray-900/30"></div>
+            {/* Enhanced background with stronger visibility */}
+            <div className="absolute inset-0 bg-gradient-to-br from-smartinvoice-purple/20 via-smartinvoice-soft-gray/50 to-background/90 backdrop-blur-md z-0 border border-smartinvoice-purple/20 shadow-lg rounded-2xl dark:from-smartinvoice-purple/30 dark:via-gray-800/60 dark:to-gray-900/50 dark:border-smartinvoice-purple/30"></div>
             
-            {/* Content */}
+            {/* Content with gradient text animation */}
             <div className="relative z-10">
-              <p className="text-xl font-medium text-foreground max-w-2xl mx-auto dark:text-white">
+              <p className="text-xl font-medium max-w-2xl mx-auto subtitle-gradient-text">
                 Automate your invoice processing with powerful AI recognition
               </p>
             </div>

@@ -133,6 +133,13 @@
   .subtitle-container {
     @apply relative overflow-visible;
   }
+
+  /* New gradient text animation styles */
+  .subtitle-gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r animate-gradient-x font-semibold;
+    background-size: 200% 200%;
+    background-image: linear-gradient(90deg, #9b87f5, #0FA0CE, #D6BCFA, #9b87f5);
+  }
 }
 
 /* Make sure all container elements properly handle overflow for hover effects */
@@ -221,6 +228,20 @@
   }
 }
 
+/* Gradient animation keyframes */
+@keyframes gradient-x {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
 .animate-subtitle {
   animation: subtle-float 0.8s ease-out forwards;
+}
+
+.animate-gradient-x {
+  animation: gradient-x 8s ease infinite;
 }
