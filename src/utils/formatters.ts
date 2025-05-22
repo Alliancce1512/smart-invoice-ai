@@ -33,3 +33,32 @@ export const formatDateTime = (dateString: string | null) => {
     return dateString || "Not available";
   }
 };
+
+// Helper function to format time elapsed since a given date
+export const formatTimeElapsed = (dateString: string | null) => {
+  if (!dateString) return "Not available";
+  
+  try {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMilliseconds = now.getTime() - date.getTime();
+    
+    // Convert to seconds, minutes, hours, days
+    const seconds = Math.floor(diffInMilliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    if (days > 0) {
+      return days === 1 ? "Yesterday" : `${days} days ago`;
+    } else if (hours > 0) {
+      return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    } else if (minutes > 0) {
+      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+    } else {
+      return "Just now";
+    }
+  } catch (error) {
+    return "Not available";
+  }
+};

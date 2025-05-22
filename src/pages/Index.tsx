@@ -6,9 +6,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, Upload, FileText, TrendingUp, Clock, FileCheck, Star, Zap, Check, CheckCheck, ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle, Upload, FileText, TrendingUp, Clock, FileCheck, Star, Zap, Check, CheckCheck, Activity, FileUp, ListChecks } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, HorizontalScrollArea } from "@/components/ui/scroll-area";
+import { formatDateTime } from "@/utils/formatters";
 
 interface SuccessMessage {
   vendor: string;
@@ -33,14 +34,13 @@ const ActionCard: React.FC<ActionCardProps> = ({
   buttonVariant = "outline", 
   onClick 
 }) => (
-  <Card className="group hover-scale border-border hover:border-smartinvoice-purple transition-all duration-300 dark:hover:border-smartinvoice-purple min-w-[250px] md:min-w-[280px] flex flex-col">
+  <Card className="group hover:scale-[1.02] border-border hover:border-smartinvoice-purple transition-all duration-300 hover:shadow-lg dark:hover:border-smartinvoice-purple min-w-[250px] md:min-w-[280px] flex flex-col">
     <CardHeader className="flex flex-row items-center space-x-4 pb-2">
-      <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center">
+      <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center group-hover:bg-smartinvoice-purple/10 transition-colors">
         {icon}
       </div>
       <div className="space-y-1">
         <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
       </div>
     </CardHeader>
     <CardContent className="text-sm text-muted-foreground flex-grow">
@@ -58,14 +58,49 @@ const ActionCard: React.FC<ActionCardProps> = ({
   </Card>
 );
 
+// A simple activity item component
+const ActivityItem = ({ icon, title, time, description }) => (
+  <div className="flex items-start space-x-3 p-3 rounded-lg transition-colors hover:bg-muted/50">
+    <div className="mt-0.5 text-smartinvoice-purple bg-smartinvoice-purple/10 p-2 rounded-full">
+      {icon}
+    </div>
+    <div className="flex-1">
+      <div className="flex justify-between items-start">
+        <h4 className="font-medium">{title}</h4>
+        <span className="text-xs text-muted-foreground">{time}</span>
+      </div>
+      <p className="text-sm text-muted-foreground">{description}</p>
+    </div>
+  </div>
+);
+
+// Sample recent activity data
+const recentActivities = [
+  {
+    icon: <Upload className="h-4 w-4" />,
+    title: "Invoice Uploaded",
+    time: "Today",
+    description: "You uploaded an invoice from CloudTech Services for $1,299.00"
+  },
+  {
+    icon: <CheckCircle className="h-4 w-4" />,
+    title: "Invoice Approved",
+    time: "Yesterday",
+    description: "Your invoice from Marketing Solutions was approved"
+  },
+  {
+    icon: <Activity className="h-4 w-4" />,
+    title: "Status Change",
+    time: "2 days ago",
+    description: "Invoice #INV-2023-004 status changed to 'Under Review'"
+  }
+];
+
 const Index = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successMessage, setSuccessMessage] = useState<SuccessMessage | null>(null);
   const navigate = useNavigate();
   const { accessConfig } = useAuth();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [showLeftScroll, setShowLeftScroll] = useState(false);
-  const [showRightScroll, setShowRightScroll] = useState(true);
   
   useEffect(() => {
     // Check for success message in session storage
@@ -81,31 +116,8 @@ const Index = () => {
         console.error("Failed to parse success message:", error);
       }
     }
-
-    // Check if scroll buttons should be visible
-    checkScrollButtons();
-    window.addEventListener('resize', checkScrollButtons);
-    return () => window.removeEventListener('resize', checkScrollButtons);
   }, []);
 
-  const checkScrollButtons = () => {
-    if (!scrollContainerRef.current) return;
-    
-    const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-    setShowLeftScroll(scrollLeft > 0);
-    setShowRightScroll(scrollLeft < scrollWidth - clientWidth - 10); // 10px buffer
-  };
-
-  const handleScroll = (direction: 'left' | 'right') => {
-    if (!scrollContainerRef.current) return;
-    
-    const scrollAmount = direction === 'left' ? -300 : 300;
-    scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    
-    // Update scroll button visibility after scrolling
-    setTimeout(checkScrollButtons, 300);
-  };
-  
   const handleProcessAnother = () => {
     setShowSuccessDialog(false);
     navigate("/upload");
@@ -114,9 +126,9 @@ const Index = () => {
   // Action card data with role-based filtering applied later
   const actionCards = [
     {
-      icon: <Upload className="h-6 w-6 text-smartinvoice-purple" />,
-      title: "Process Invoice",
-      description: "Upload and extract data",
+      icon: <FileUp className="h-6 w-6 text-smartinvoice-purple" />,
+      title: "Upload Your Next Invoice",
+      description: "Quickly upload and process your invoice using our AI-powered system",
       buttonText: "Upload Now",
       buttonVariant: "default" as const,
       onClick: () => navigate("/upload"),
@@ -124,32 +136,32 @@ const Index = () => {
     },
     {
       icon: <FileText className="h-6 w-6 text-smartinvoice-purple" />,
-      title: "View Submissions",
-      description: "Track your invoices",
+      title: "Check Latest Status",
+      description: "Track and view the current status of all your submitted invoices",
       buttonText: "View Invoices",
       onClick: () => navigate("/requests"),
       requiredRole: null, // Available to all
     },
     {
-      icon: <FileCheck className="h-6 w-6 text-smartinvoice-purple" />,
-      title: "Start Reviewing",
-      description: "Review invoices & send for approval",
-      buttonText: "Review Now",
+      icon: <ListChecks className="h-6 w-6 text-smartinvoice-purple" />,
+      title: "Review Pending Invoices",
+      description: "Start reviewing submitted invoices and send them for approval",
+      buttonText: "Start Reviewing",
       onClick: () => navigate("/review"),
       requiredRole: "canReviewInvoices",
     },
     {
       icon: <Check className="h-6 w-6 text-smartinvoice-purple" />,
-      title: "Approve Invoices",
-      description: "Final invoice approval",
-      buttonText: "Approve Now",
+      title: "Approve Pending Invoices",
+      description: "Review and provide final approval for pending invoices",
+      buttonText: "Start Approving",
       onClick: () => navigate("/approve"),
       requiredRole: "canApproveInvoices",
     },
     {
       icon: <CheckCheck className="h-6 w-6 text-smartinvoice-purple" />,
-      title: "Approved Requests",
-      description: "View approved invoices",
+      title: "View Approved Invoices",
+      description: "Access all approved invoices and their details",
       buttonText: "View Approved",
       onClick: () => navigate("/approved"),
       requiredRole: null, // Available to all
@@ -167,37 +179,28 @@ const Index = () => {
   return (
     <Layout>
       <div className="w-full max-w-5xl mx-auto py-8 space-y-12">
-        {/* Hero section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground tracking-tight">
-            Welcome to <span className="text-smartinvoice-purple">SmartInvoice AI</span>
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Automate your invoice processing with powerful AI recognition
-          </p>
+        {/* Hero section with decorative background */}
+        <div className="text-center mb-12 relative py-12 px-4 rounded-2xl overflow-hidden">
+          {/* Decorative gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-smartinvoice-soft-gray/50 to-background z-0 opacity-70"></div>
+          
+          {/* Content */}
+          <div className="relative z-10">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-foreground tracking-tight">
+              Welcome to <span className="text-smartinvoice-purple">SmartInvoice AI</span>
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Automate your invoice processing with powerful AI recognition
+            </p>
+          </div>
         </div>
 
-        {/* Quick action cards - now horizontally scrollable */}
+        {/* Quick action cards - horizontally scrollable with snap */}
         <div className="relative">
-          {showLeftScroll && (
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm border-gray-200 shadow-md hidden md:flex"
-              onClick={() => handleScroll('left')}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-          )}
-          
-          <div className="overflow-hidden">
-            <div 
-              ref={scrollContainerRef} 
-              className="flex gap-6 pb-4 overflow-x-auto scrollbar-none snap-x" 
-              onScroll={checkScrollButtons}
-            >
+          <HorizontalScrollArea className="py-4">
+            <div className="flex gap-6 snap-x snap-mandatory px-1">
               {filteredActionCards.map((card, index) => (
-                <div key={index} className="snap-start flex-shrink-0">
+                <div key={index} className="snap-center flex-shrink-0">
                   <ActionCard 
                     icon={card.icon}
                     title={card.title}
@@ -209,21 +212,39 @@ const Index = () => {
                 </div>
               ))}
             </div>
-          </div>
-          
-          {showRightScroll && (
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm border-gray-200 shadow-md hidden md:flex"
-              onClick={() => handleScroll('right')}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          )}
+          </HorizontalScrollArea>
         </div>
         
-        {/* Features section */}
+        {/* Recent Activity section */}
+        <div className="pt-6">
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold mb-2">Recent Activity</h2>
+            <p className="text-muted-foreground">Your latest invoice processing activities</p>
+          </div>
+          
+          <Card className="border-border shadow-sm">
+            <CardContent className="p-0">
+              <div className="divide-y">
+                {recentActivities.map((activity, index) => (
+                  <ActivityItem 
+                    key={index}
+                    icon={activity.icon}
+                    title={activity.title}
+                    time={activity.time}
+                    description={activity.description}
+                  />
+                ))}
+              </div>
+            </CardContent>
+            <CardFooter className="px-4 py-3 border-t">
+              <Button variant="ghost" size="sm" className="ml-auto text-smartinvoice-purple hover:text-smartinvoice-purple-dark hover:bg-smartinvoice-purple/10">
+                View All Activity
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+        
+        {/* Features section with improved visuals */}
         <div className="pt-6">
           <Tabs defaultValue="features" className="w-full">
             <TabsList className="grid w-full md:w-auto md:inline-flex grid-cols-2 md:grid-cols-none h-auto">
@@ -246,15 +267,15 @@ const Index = () => {
             </TabsList>
             
             <TabsContent value="features" className="mt-6">
-              <Card>
-                <CardHeader>
+              <Card className="border shadow-md hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-gradient-to-r from-smartinvoice-soft-gray/30 to-background border-b">
                   <CardTitle>Key Features</CardTitle>
                   <CardDescription>What makes SmartInvoice AI powerful</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="flex items-start space-x-3">
-                      <div className="mt-0.5 text-smartinvoice-purple">
+                <CardContent className="pt-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="flex items-start space-x-3 bg-card p-4 rounded-lg border border-border/40 hover:border-smartinvoice-purple/30 transition-colors">
+                      <div className="mt-0.5 text-smartinvoice-purple bg-smartinvoice-purple/10 p-2 rounded-full">
                         <CheckCircle className="h-5 w-5" />
                       </div>
                       <div>
@@ -262,8 +283,8 @@ const Index = () => {
                         <p className="text-sm text-muted-foreground">Extract data from any invoice format with high accuracy</p>
                       </div>
                     </div>
-                    <div className="flex items-start space-x-3">
-                      <div className="mt-0.5 text-smartinvoice-purple">
+                    <div className="flex items-start space-x-3 bg-card p-4 rounded-lg border border-border/40 hover:border-smartinvoice-purple/30 transition-colors">
+                      <div className="mt-0.5 text-smartinvoice-purple bg-smartinvoice-purple/10 p-2 rounded-full">
                         <CheckCircle className="h-5 w-5" />
                       </div>
                       <div>
@@ -271,8 +292,8 @@ const Index = () => {
                         <p className="text-sm text-muted-foreground">Automatic verification of invoice data and calculations</p>
                       </div>
                     </div>
-                    <div className="flex items-start space-x-3">
-                      <div className="mt-0.5 text-smartinvoice-purple">
+                    <div className="flex items-start space-x-3 bg-card p-4 rounded-lg border border-border/40 hover:border-smartinvoice-purple/30 transition-colors">
+                      <div className="mt-0.5 text-smartinvoice-purple bg-smartinvoice-purple/10 p-2 rounded-full">
                         <CheckCircle className="h-5 w-5" />
                       </div>
                       <div>
@@ -280,8 +301,8 @@ const Index = () => {
                         <p className="text-sm text-muted-foreground">Streamlined process for reviewing and approving invoices</p>
                       </div>
                     </div>
-                    <div className="flex items-start space-x-3">
-                      <div className="mt-0.5 text-smartinvoice-purple">
+                    <div className="flex items-start space-x-3 bg-card p-4 rounded-lg border border-border/40 hover:border-smartinvoice-purple/30 transition-colors">
+                      <div className="mt-0.5 text-smartinvoice-purple bg-smartinvoice-purple/10 p-2 rounded-full">
                         <CheckCircle className="h-5 w-5" />
                       </div>
                       <div>
@@ -295,15 +316,15 @@ const Index = () => {
             </TabsContent>
             
             <TabsContent value="benefits" className="mt-6">
-              <Card>
-                <CardHeader>
+              <Card className="border shadow-md hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-gradient-to-r from-green-50 to-background border-b dark:from-green-950/20 dark:to-background">
                   <CardTitle>Business Benefits</CardTitle>
                   <CardDescription>How SmartInvoice AI saves you time and money</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                   <div className="space-y-4">
-                    <div className="flex items-start space-x-3">
-                      <div className="mt-0.5 text-green-500">
+                    <div className="flex items-start space-x-3 bg-card p-4 rounded-lg border border-border/40 hover:border-green-300/30 transition-colors">
+                      <div className="mt-0.5 text-green-500 bg-green-100 dark:bg-green-900/30 p-2 rounded-full">
                         <TrendingUp className="h-5 w-5" />
                       </div>
                       <div>
@@ -311,8 +332,8 @@ const Index = () => {
                         <p className="text-sm text-muted-foreground">Reduce manual data entry by up to 90% with automated extraction</p>
                       </div>
                     </div>
-                    <div className="flex items-start space-x-3">
-                      <div className="mt-0.5 text-green-500">
+                    <div className="flex items-start space-x-3 bg-card p-4 rounded-lg border border-border/40 hover:border-green-300/30 transition-colors">
+                      <div className="mt-0.5 text-green-500 bg-green-100 dark:bg-green-900/30 p-2 rounded-full">
                         <Clock className="h-5 w-5" />
                       </div>
                       <div>
@@ -326,22 +347,22 @@ const Index = () => {
             </TabsContent>
             
             <TabsContent value="stats" className="mt-6">
-              <Card>
-                <CardHeader>
+              <Card className="border shadow-md hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-gradient-to-r from-blue-50/50 to-background border-b dark:from-blue-950/20 dark:to-background">
                   <CardTitle>System Statistics</CardTitle>
                   <CardDescription>Processing performance and accuracy</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-center">
-                    <div className="p-4 bg-muted/40 rounded-lg">
+                    <div className="p-4 bg-gradient-to-br from-smartinvoice-soft-gray/40 to-background rounded-lg border border-border/40">
                       <div className="text-3xl font-bold text-smartinvoice-purple">99%</div>
                       <div className="text-sm text-muted-foreground mt-1">Accuracy Rate</div>
                     </div>
-                    <div className="p-4 bg-muted/40 rounded-lg">
+                    <div className="p-4 bg-gradient-to-br from-smartinvoice-soft-gray/40 to-background rounded-lg border border-border/40">
                       <div className="text-3xl font-bold text-smartinvoice-purple">~5s</div>
                       <div className="text-sm text-muted-foreground mt-1">Avg. Processing Time</div>
                     </div>
-                    <div className="p-4 bg-muted/40 rounded-lg">
+                    <div className="p-4 bg-gradient-to-br from-smartinvoice-soft-gray/40 to-background rounded-lg border border-border/40">
                       <div className="text-3xl font-bold text-smartinvoice-purple">50+</div>
                       <div className="text-sm text-muted-foreground mt-1">Supported Languages</div>
                     </div>
@@ -351,22 +372,22 @@ const Index = () => {
             </TabsContent>
             
             <TabsContent value="recent" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
+              <Card className="border shadow-md hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-gradient-to-r from-purple-50/50 to-background border-b dark:from-purple-950/20 dark:to-background">
+                  <CardTitle>Recent Updates</CardTitle>
                   <CardDescription>Latest system updates and features</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                   <div className="space-y-4">
-                    <div className="border-l-2 border-smartinvoice-purple pl-4 py-1">
+                    <div className="border-l-2 border-smartinvoice-purple pl-4 py-2 hover:bg-muted/30 rounded-r-lg transition-colors">
                       <p className="text-sm text-muted-foreground">New feature: Multi-currency support for international invoices</p>
                       <p className="text-xs text-muted-foreground/70">Added 3 days ago</p>
                     </div>
-                    <div className="border-l-2 border-smartinvoice-purple pl-4 py-1">
+                    <div className="border-l-2 border-smartinvoice-purple pl-4 py-2 hover:bg-muted/30 rounded-r-lg transition-colors">
                       <p className="text-sm text-muted-foreground">New feature: Enhanced data extraction for complex layouts</p>
                       <p className="text-xs text-muted-foreground/70">Added 1 week ago</p>
                     </div>
-                    <div className="border-l-2 border-smartinvoice-purple pl-4 py-1">
+                    <div className="border-l-2 border-smartinvoice-purple pl-4 py-2 hover:bg-muted/30 rounded-r-lg transition-colors">
                       <p className="text-sm text-muted-foreground">System update: Improved processing speed by 35%</p>
                       <p className="text-xs text-muted-foreground/70">2 weeks ago</p>
                     </div>
