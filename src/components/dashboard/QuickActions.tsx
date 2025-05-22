@@ -75,10 +75,10 @@ export const QuickActions: React.FC = () => {
           }}
           className="w-full"
         >
-          <CarouselContent className="py-1">
+          <CarouselContent className="py-1 px-1">
             {filteredActionCards.map((card, index) => (
-              <CarouselItem key={index} className="basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 pl-4 first:pl-4">
-                <div className="h-full min-w-[290px]">
+              <CarouselItem key={index} className="basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 pl-6 first:pl-6">
+                <div className="h-full min-w-[300px]">
                   <ActionCard 
                     icon={card.icon}
                     title={card.title}
@@ -94,8 +94,8 @@ export const QuickActions: React.FC = () => {
           
           {/* Custom Carousel Navigation - Repositioned for better visibility */}
           <div className="hidden sm:flex">
-            <CarouselPrevious className="-left-12 bg-background border-input hover:bg-accent hover:text-accent-foreground shadow-sm" />
-            <CarouselNext className="-right-12 bg-background border-input hover:bg-accent hover:text-accent-foreground shadow-sm" />
+            <CarouselPrevious className="-left-14 bg-background border-input hover:bg-accent hover:text-accent-foreground shadow-sm" />
+            <CarouselNext className="-right-14 bg-background border-input hover:bg-accent hover:text-accent-foreground shadow-sm" />
           </div>
           
           {/* Mobile Navigation Buttons */}
@@ -126,9 +126,9 @@ export const QuickActions: React.FC = () => {
             </Button>
           </div>
           
-          {/* Improved fade effects - extending full height */}
-          <div className="absolute left-0 top-0 bottom-0 w-16 pointer-events-none bg-gradient-to-r from-background to-transparent z-10"></div>
-          <div className="absolute right-0 top-0 bottom-0 w-16 pointer-events-none bg-gradient-to-l from-background to-transparent z-10"></div>
+          {/* Improved fade effects using background matching the page background */}
+          <div className="absolute left-0 top-0 bottom-0 w-20 pointer-events-none bg-gradient-to-r from-background to-transparent z-10"></div>
+          <div className="absolute right-0 top-0 bottom-0 w-20 pointer-events-none bg-gradient-to-l from-background to-transparent z-10"></div>
         </Carousel>
       </div>
     </div>

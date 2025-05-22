@@ -43,7 +43,7 @@ const Index = () => {
   
   return (
     <Layout>
-      <div className="w-full max-w-5xl mx-auto py-4 space-y-6">
+      <div className="w-full max-w-5xl mx-auto py-4 space-y-8 bg-background">
         {/* Enhanced subtitle/tagline section */}
         <SubtitleSection animateSubtitle={animateSubtitle} />
 
