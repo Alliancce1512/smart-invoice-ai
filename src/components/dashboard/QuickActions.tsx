@@ -1,8 +1,6 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { HorizontalScrollArea } from "@/components/ui/scroll-area";
 import { FileUp, FileText, ListChecks, Check, CheckCheck } from "lucide-react";
 import ActionCard from "./ActionCard";
 
@@ -64,11 +62,11 @@ export const QuickActions: React.FC = () => {
   });
   
   return (
-    <div className="relative px-0 sm:px-1 -mx-4 sm:mx-0 overflow-visible">
-      <div className="py-2 px-4 overflow-x-auto scrollbar-hide">
-        <div className="flex gap-3 sm:gap-5 pb-2 overflow-visible w-max sm:w-auto">
+    <div className="relative px-4 sm:px-6 -mx-4 sm:mx-0">
+      <div className="py-4 overflow-x-auto scrollbar-hide">
+        <div className="flex flex-wrap sm:flex-nowrap gap-4 sm:gap-5 overflow-visible">
           {filteredActionCards.map((card, index) => (
-            <div key={index} className="flex-shrink-0 w-[280px] xs:w-[290px] sm:w-auto transform-gpu">
+            <div key={index} className="w-full sm:w-auto min-w-[270px] transform-gpu">
               <ActionCard 
                 icon={card.icon}
                 title={card.title}
