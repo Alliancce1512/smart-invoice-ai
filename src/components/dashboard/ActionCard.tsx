@@ -20,23 +20,24 @@ export const ActionCard: React.FC<ActionCardProps> = ({
   buttonVariant = "outline", 
   onClick 
 }) => (
-  <Card className="group transform transition-all duration-300 shadow-sm hover:shadow-md border-border hover:border-smartinvoice-purple dark:hover:border-smartinvoice-purple min-w-[250px] md:min-w-[280px] flex flex-col card-shadow">
-    <CardHeader className="flex flex-row items-center space-x-4 pb-2">
-      <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center group-hover:bg-smartinvoice-purple/10 transition-colors">
+  <Card className="group transform transition-all duration-300 shadow-sm hover:shadow-md border-border hover:border-smartinvoice-purple dark:hover:border-smartinvoice-purple w-full flex flex-col card-shadow">
+    <CardHeader className="flex flex-row items-center space-x-4 pb-2 p-4">
+      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center group-hover:bg-smartinvoice-purple/10 transition-colors">
         {icon}
       </div>
-      <div className="space-y-1">
-        <CardTitle>{title}</CardTitle>
+      <div>
+        <CardTitle className="text-base sm:text-lg">{title}</CardTitle>
       </div>
     </CardHeader>
-    <CardContent className="text-sm text-muted-foreground flex-grow">
+    <CardContent className="text-xs sm:text-sm text-muted-foreground flex-grow px-4 py-2">
       {description}
     </CardContent>
-    <CardFooter>
+    <CardFooter className="p-4 pt-2">
       <Button 
         onClick={onClick}
         className={`w-full ${buttonVariant === "default" ? "bg-smartinvoice-purple hover:bg-smartinvoice-purple-dark text-white" : "bg-card hover:bg-muted text-foreground border border-input"}`}
         variant={buttonVariant}
+        size="sm"
       >
         {buttonText}
       </Button>

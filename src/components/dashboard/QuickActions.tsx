@@ -64,11 +64,11 @@ export const QuickActions: React.FC = () => {
   });
   
   return (
-    <div className="relative px-1 overflow-visible">
-      <HorizontalScrollArea className="py-2 -mx-1 overflow-visible">
-        <div className="flex gap-5 snap-x snap-mandatory px-4 pb-2 overflow-visible">
+    <div className="relative px-0 sm:px-1 -mx-4 sm:mx-0 overflow-visible">
+      <div className="py-2 px-4 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-3 sm:gap-5 pb-2 overflow-visible w-max sm:w-auto">
           {filteredActionCards.map((card, index) => (
-            <div key={index} className="snap-center flex-shrink-0 transform-gpu">
+            <div key={index} className="flex-shrink-0 w-[280px] xs:w-[290px] sm:w-auto transform-gpu">
               <ActionCard 
                 icon={card.icon}
                 title={card.title}
@@ -80,7 +80,7 @@ export const QuickActions: React.FC = () => {
             </div>
           ))}
         </div>
-      </HorizontalScrollArea>
+      </div>
     </div>
   );
 };
