@@ -19,7 +19,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="abstract-shape shape2"></div>
       <div className="abstract-shape shape3"></div>
       
-      <div className="sticky top-0 z-10 shadow-md bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-b border-gray-100 dark:border-gray-700">
+      <div className="sticky top-0 z-20 shadow-md bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg border-b border-gray-100 dark:border-gray-700">
         <header className="container mx-auto px-4 py-3">
           <div className="flex justify-between items-center">
             <Link 
@@ -37,11 +37,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {isAuthenticated && <Navigation />}
       </div>
 
-      <main className="flex-1 container mx-auto p-4 animate-fade-in">
+      <main className="flex-1 container mx-auto px-4 py-2 animate-fade-in">
         {children}
       </main>
 
-      <footer className="py-4 sm:py-6 border-t border-gray-100 dark:border-gray-700 mt-auto">
+      <footer className="py-4 border-t border-gray-100 dark:border-gray-700 mt-auto">
         <div className="container mx-auto text-center text-sm text-gray-500 dark:text-gray-400">
           © {new Date().getFullYear()} SmartInvoice AI. All rights reserved.
         </div>

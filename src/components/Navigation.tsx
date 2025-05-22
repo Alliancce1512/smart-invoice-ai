@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Moon, Sun, Inbox, Users, Home, Upload, FileCheck, Menu, X, FileText, ClipboardCheck } from "lucide-react";
+import { Moon, Sun, Home, Upload, FileCheck, Menu, X, FileText, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Navigation: React.FC = () => {
@@ -63,7 +63,7 @@ const Navigation: React.FC = () => {
       {
         to: "/approved",
         label: "Approved Requests",
-        icon: <Users className="w-4 h-4 mr-1" />,
+        icon: <FileText className="w-4 h-4 mr-1" />,
         active: location.pathname === "/approved"
       }
     );

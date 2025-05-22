@@ -178,9 +178,9 @@ const Index = () => {
   
   return (
     <Layout>
-      <div className="w-full max-w-5xl mx-auto py-4 space-y-8">
+      <div className="w-full max-w-5xl mx-auto py-4 space-y-6">
         {/* Subtitle/tagline section with decorative background */}
-        <div className="text-center mb-6 relative py-6 px-4 rounded-2xl overflow-hidden">
+        <div className="text-center mb-4 relative py-6 px-4 rounded-2xl overflow-hidden">
           {/* Decorative gradient background */}
           <div className="absolute inset-0 bg-gradient-to-br from-smartinvoice-soft-gray/50 to-background z-0 opacity-70"></div>
           
@@ -213,13 +213,13 @@ const Index = () => {
         </div>
         
         {/* Recent Activity section */}
-        <div className="pt-3">
-          <div className="mb-4">
+        <div className="pt-2">
+          <div className="mb-3">
             <h2 className="text-2xl font-semibold mb-2">Recent Activity</h2>
             <p className="text-muted-foreground">Your latest invoice processing activities</p>
           </div>
           
-          <Card className="border-border shadow-sm">
+          <Card className="border-border shadow-md hover:shadow-lg transition-shadow">
             <CardContent className="p-0">
               <div className="divide-y">
                 {recentActivities.map((activity, index) => (
@@ -242,7 +242,7 @@ const Index = () => {
         </div>
         
         {/* Features section with improved visuals */}
-        <div className="pt-3">
+        <div className="pt-2">
           <Tabs defaultValue="features" className="w-full">
             <TabsList className="grid w-full md:w-auto md:inline-flex grid-cols-2 md:grid-cols-none h-auto">
               <TabsTrigger value="features" className="flex items-center space-x-2">
@@ -259,7 +259,7 @@ const Index = () => {
               </TabsTrigger>
               <TabsTrigger value="recent" className="flex items-center space-x-2">
                 <Clock className="h-4 w-4" />
-                <span>Recent Activity</span>
+                <span>Recent Updates</span>
               </TabsTrigger>
             </TabsList>
             
