@@ -1,12 +1,18 @@
-import React from "react";
+
+import React, { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { FileUp, FileText, ListChecks, Check, CheckCheck } from "lucide-react";
+import { FileUp, FileText, ListChecks, Check, CheckCheck, ArrowLeft, ArrowRight } from "lucide-react";
 import ActionCard from "./ActionCard";
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
+import { Button } from "@/components/ui/button";
 
 export const QuickActions: React.FC = () => {
   const navigate = useNavigate();
   const { accessConfig } = useAuth();
+  const [showLeftFade, setShowLeftFade] = useState(false);
+  const [showRightFade, setShowRightFade] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   // Action card data with role-based filtering applied later
   const actionCards = [
@@ -63,21 +69,72 @@ export const QuickActions: React.FC = () => {
   
   return (
     <div className="relative px-4 sm:px-6 -mx-4 sm:mx-0">
-      <div className="py-4 overflow-x-auto scrollbar-hide">
-        <div className="flex flex-wrap sm:flex-nowrap gap-4 sm:gap-5 overflow-visible">
-          {filteredActionCards.map((card, index) => (
-            <div key={index} className="w-full sm:w-auto min-w-[270px] transform-gpu">
-              <ActionCard 
-                icon={card.icon}
-                title={card.title}
-                description={card.description}
-                buttonText={card.buttonText}
-                buttonVariant={card.buttonVariant}
-                onClick={card.onClick}
-              />
-            </div>
-          ))}
-        </div>
+      <div className="py-4 relative">
+        {/* Carousel for infinite scrolling */}
+        <Carousel
+          opts={{
+            align: "start",
+            loop: true,
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="py-1">
+            {filteredActionCards.map((card, index) => (
+              <CarouselItem key={index} className="basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 pl-4 first:pl-4">
+                <div className="h-full">
+                  <ActionCard 
+                    icon={card.icon}
+                    title={card.title}
+                    description={card.description}
+                    buttonText={card.buttonText}
+                    buttonVariant={card.buttonVariant}
+                    onClick={card.onClick}
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          
+          {/* Custom Carousel Navigation */}
+          <div className="hidden sm:flex">
+            <CarouselPrevious className="-left-4 bg-background border-input hover:bg-accent hover:text-accent-foreground shadow-sm" />
+            <CarouselNext className="-right-4 bg-background border-input hover:bg-accent hover:text-accent-foreground shadow-sm" />
+          </div>
+          
+          {/* Mobile Navigation Buttons */}
+          <div className="flex justify-center gap-2 mt-4 sm:hidden">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full h-8 w-8 p-0 flex items-center justify-center"
+              onClick={() => {
+                const prevButton = document.querySelector('[data-carousel-prev]') as HTMLButtonElement;
+                if (prevButton) prevButton.click();
+              }}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Previous</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full h-8 w-8 p-0 flex items-center justify-center"
+              onClick={() => {
+                const nextButton = document.querySelector('[data-carousel-next]') as HTMLButtonElement;
+                if (nextButton) nextButton.click();
+              }}
+            >
+              <ArrowRight className="h-4 w-4" />
+              <span className="sr-only">Next</span>
+            </Button>
+          </div>
+          
+          {/* Left fade */}
+          <div className="absolute left-0 top-4 bottom-4 w-16 pointer-events-none bg-gradient-to-r from-background to-transparent z-10"></div>
+          
+          {/* Right fade */}
+          <div className="absolute right-0 top-4 bottom-4 w-16 pointer-events-none bg-gradient-to-l from-background to-transparent z-10"></div>
+        </Carousel>
       </div>
     </div>
   );
