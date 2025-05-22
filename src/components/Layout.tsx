@@ -19,7 +19,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="abstract-shape shape2"></div>
       <div className="abstract-shape shape3"></div>
       
-      <div className="sticky top-0 z-20 shadow-md bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg border-b border-gray-100 dark:border-gray-700">
+      <div className="sticky top-0 z-30 shadow-md bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg border-b border-gray-100 dark:border-gray-700">
         <header className="container mx-auto px-4 py-3">
           <div className="flex justify-between items-center">
             <Link 
