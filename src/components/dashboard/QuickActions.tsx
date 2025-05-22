@@ -65,9 +65,9 @@ export const QuickActions: React.FC = () => {
   });
   
   return (
-    <div className="relative px-4 sm:px-6 -mx-4 sm:mx-0">
-      <div className="py-4 relative">
-        {/* Carousel for infinite scrolling */}
+    <div className="px-4 sm:px-6 py-4">
+      <div className="relative">
+        {/* Carousel for horizontal scrolling */}
         <Carousel
           opts={{
             align: "start",
@@ -75,10 +75,10 @@ export const QuickActions: React.FC = () => {
           }}
           className="w-full"
         >
-          <CarouselContent className="py-1">
+          <CarouselContent className="-ml-4">
             {filteredActionCards.map((card, index) => (
-              <CarouselItem key={index} className="basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 pl-4 first:pl-4">
-                <div className="h-full min-w-[290px]">
+              <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                <div className="h-full">
                   <ActionCard 
                     icon={card.icon}
                     title={card.title}
@@ -92,10 +92,9 @@ export const QuickActions: React.FC = () => {
             ))}
           </CarouselContent>
           
-          {/* Custom Carousel Navigation - Repositioned for better visibility */}
-          <div className="hidden sm:flex">
-            <CarouselPrevious className="-left-12 bg-background border-input hover:bg-accent hover:text-accent-foreground shadow-sm" />
-            <CarouselNext className="-right-12 bg-background border-input hover:bg-accent hover:text-accent-foreground shadow-sm" />
+          <div className="hidden sm:flex justify-end mt-4">
+            <CarouselPrevious className="relative right-12 bg-background border-input hover:bg-accent hover:text-accent-foreground shadow-sm" />
+            <CarouselNext className="bg-background border-input hover:bg-accent hover:text-accent-foreground shadow-sm" />
           </div>
           
           {/* Mobile Navigation Buttons */}
@@ -126,9 +125,7 @@ export const QuickActions: React.FC = () => {
             </Button>
           </div>
           
-          {/* Improved fade effects - extending full height */}
-          <div className="absolute left-0 top-0 bottom-0 w-16 pointer-events-none bg-gradient-to-r from-background to-transparent z-10"></div>
-          <div className="absolute right-0 top-0 bottom-0 w-16 pointer-events-none bg-gradient-to-l from-background to-transparent z-10"></div>
+          {/* Fade effects removed */}
         </Carousel>
       </div>
     </div>

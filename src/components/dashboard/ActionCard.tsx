@@ -20,7 +20,7 @@ export const ActionCard: React.FC<ActionCardProps> = ({
   buttonVariant = "outline", 
   onClick 
 }) => (
-  <Card className="group h-full transform transition-all duration-300 shadow-sm hover:shadow-md border-border hover:border-smartinvoice-purple dark:hover:border-smartinvoice-purple flex flex-col card-shadow">
+  <Card className="group h-full transform transition-all duration-300 shadow-sm hover:shadow-md border-border hover:border-smartinvoice-purple dark:hover:border-smartinvoice-purple flex flex-col w-full min-w-[280px]">
     <CardHeader className="flex flex-row items-center space-x-4 pb-2 p-4">
       <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center group-hover:bg-smartinvoice-purple/10 transition-colors">
         {icon}
