@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -65,7 +64,7 @@ export const QuickActions: React.FC = () => {
   });
   
   return (
-    <div className="px-4 sm:px-6 py-4">
+    <div className="px-4 sm:px-6 py-6">
       <div className="relative">
         {/* Carousel for horizontal scrolling */}
         <Carousel
@@ -75,9 +74,9 @@ export const QuickActions: React.FC = () => {
           }}
           className="w-full"
         >
-          <CarouselContent className="-ml-4">
+          <CarouselContent className="-ml-6">
             {filteredActionCards.map((card, index) => (
-              <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+              <CarouselItem key={index} className="pl-6 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
                 <div className="h-full">
                   <ActionCard 
                     icon={card.icon}
@@ -92,40 +91,12 @@ export const QuickActions: React.FC = () => {
             ))}
           </CarouselContent>
           
-          <div className="hidden sm:flex justify-end mt-4">
-            <CarouselPrevious className="relative right-12 bg-background border-input hover:bg-accent hover:text-accent-foreground shadow-sm" />
-            <CarouselNext className="bg-background border-input hover:bg-accent hover:text-accent-foreground shadow-sm" />
+          <div className="flex justify-center mt-4 gap-4">
+            <CarouselPrevious className="static transform-none inline-flex bg-background border-input hover:bg-accent hover:text-accent-foreground shadow-sm" />
+            <CarouselNext className="static transform-none inline-flex bg-background border-input hover:bg-accent hover:text-accent-foreground shadow-sm" />
           </div>
           
-          {/* Mobile Navigation Buttons */}
-          <div className="flex justify-center gap-2 mt-4 sm:hidden">
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-full h-8 w-8 p-0 flex items-center justify-center"
-              onClick={() => {
-                const prevButton = document.querySelector('[data-carousel-prev]') as HTMLButtonElement;
-                if (prevButton) prevButton.click();
-              }}
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="sr-only">Previous</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-full h-8 w-8 p-0 flex items-center justify-center"
-              onClick={() => {
-                const nextButton = document.querySelector('[data-carousel-next]') as HTMLButtonElement;
-                if (nextButton) nextButton.click();
-              }}
-            >
-              <ArrowRight className="h-4 w-4" />
-              <span className="sr-only">Next</span>
-            </Button>
-          </div>
-          
-          {/* Fade effects removed */}
+          {/* Mobile Navigation Buttons - no longer needed as we moved the main buttons to the center */}
         </Carousel>
       </div>
     </div>

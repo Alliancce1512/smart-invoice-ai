@@ -204,14 +204,12 @@ const CarouselPrevious = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute  h-8 w-8 rounded-full",
-        orientation === "horizontal"
-          ? "-left-12 top-1/2 -translate-y-1/2"
-          : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
+        "h-8 w-8 rounded-full",
         className
       )}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
+      data-carousel-prev
       {...props}
     >
       <ArrowLeft className="h-4 w-4" />
@@ -233,14 +231,12 @@ const CarouselNext = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute h-8 w-8 rounded-full",
-        orientation === "horizontal"
-          ? "-right-12 top-1/2 -translate-y-1/2"
-          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
+        "h-8 w-8 rounded-full",
         className
       )}
       disabled={!canScrollNext}
       onClick={scrollNext}
+      data-carousel-next
       {...props}
     >
       <ArrowRight className="h-4 w-4" />
