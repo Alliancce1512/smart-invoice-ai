@@ -128,6 +128,22 @@
   .dark .dark-card {
     @apply bg-gray-800/90 border-gray-700 shadow-lg shadow-blue-500/5;
   }
+  
+  /* New subtitle container styles */
+  .subtitle-container {
+    @apply relative overflow-visible;
+  }
+}
+
+/* Make sure all container elements properly handle overflow for hover effects */
+.overflow-visible,
+.overflow-visible > * {
+  overflow: visible !important;
+}
+
+/* Ensure HorizontalScrollArea properly handles overflow for hover effects */
+.horizontal-scroll-area {
+  overflow: visible !important;
 }
 
 .abstract-shape {
@@ -191,4 +207,20 @@
 .page-transition-exit-active {
   opacity: 0;
   transition: opacity 300ms;
+}
+
+/* Subtitle animation keyframes */
+@keyframes subtle-float {
+  0% {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-subtitle {
+  animation: subtle-float 0.8s ease-out forwards;
 }

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -34,7 +33,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
   buttonVariant = "outline", 
   onClick 
 }) => (
-  <Card className="group transform transition-all duration-300 shadow-sm hover:shadow-md border-border hover:border-smartinvoice-purple dark:hover:border-smartinvoice-purple min-w-[250px] md:min-w-[280px] flex flex-col">
+  <Card className="group transform transition-all duration-300 shadow-sm hover:shadow-md border-border hover:border-smartinvoice-purple dark:hover:border-smartinvoice-purple min-w-[250px] md:min-w-[280px] flex flex-col card-shadow">
     <CardHeader className="flex flex-row items-center space-x-4 pb-2">
       <div className="h-12 w-12 rounded-full bg-smartinvoice-soft-gray dark:bg-gray-800 flex items-center justify-center group-hover:bg-smartinvoice-purple/10 transition-colors">
         {icon}
@@ -99,6 +98,7 @@ const recentActivities = [
 const Index = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successMessage, setSuccessMessage] = useState<SuccessMessage | null>(null);
+  const [animateSubtitle, setAnimateSubtitle] = useState(false);
   const navigate = useNavigate();
   const { accessConfig } = useAuth();
   
@@ -116,6 +116,11 @@ const Index = () => {
         console.error("Failed to parse success message:", error);
       }
     }
+    
+    // Trigger subtitle animation after a short delay
+    setTimeout(() => {
+      setAnimateSubtitle(true);
+    }, 300);
   }, []);
 
   const handleProcessAnother = () => {
@@ -179,23 +184,31 @@ const Index = () => {
   return (
     <Layout>
       <div className="w-full max-w-5xl mx-auto py-4 space-y-6">
-        {/* Subtitle/tagline section with decorative background */}
-        <div className="text-center mb-4 relative py-6 px-4 rounded-2xl overflow-hidden">
-          {/* Decorative gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-smartinvoice-soft-gray/50 to-background z-0 opacity-70 dark:from-gray-800/50 dark:to-gray-900/30"></div>
-          
-          {/* Content */}
-          <div className="relative z-10">
-            <p className="text-xl text-foreground max-w-2xl mx-auto dark:text-white">
-              Automate your invoice processing with powerful AI recognition
-            </p>
+        {/* Enhanced subtitle/tagline section with animation and backdrop blur */}
+        <div 
+          className={`text-center mb-4 relative overflow-hidden transform transition-all duration-700 ease-out ${
+            animateSubtitle 
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-6'
+          }`}
+        >
+          <div className="py-6 px-6 rounded-2xl overflow-hidden">
+            {/* Decorative background with blur */}
+            <div className="absolute inset-0 bg-gradient-to-br from-smartinvoice-purple/5 via-smartinvoice-soft-gray/30 to-background backdrop-blur-sm z-0 border border-background/10 shadow-sm rounded-2xl dark:from-smartinvoice-purple/10 dark:via-gray-800/40 dark:to-gray-900/30"></div>
+            
+            {/* Content */}
+            <div className="relative z-10">
+              <p className="text-xl font-medium text-foreground max-w-2xl mx-auto dark:text-white">
+                Automate your invoice processing with powerful AI recognition
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Quick action cards - horizontally scrollable with snap */}
-        <div className="relative px-1">
-          <HorizontalScrollArea className="py-2 -mx-1">
-            <div className="flex gap-5 snap-x snap-mandatory px-4 pb-2">
+        <div className="relative px-1 overflow-visible">
+          <HorizontalScrollArea className="py-2 -mx-1 overflow-visible">
+            <div className="flex gap-5 snap-x snap-mandatory px-4 pb-2 overflow-visible">
               {filteredActionCards.map((card, index) => (
                 <div key={index} className="snap-center flex-shrink-0 transform-gpu">
                   <ActionCard 
