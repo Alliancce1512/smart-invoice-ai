@@ -186,7 +186,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
     return (
       <EmptyPlaceholder
         icon={<FileX className="h-12 w-12 text-muted-foreground" />}
-        title="No invoices to display"
+        title="No invoices to display."
         description="There are currently no invoices to display."
         action={onRefresh ? {
           label: "Refresh",
