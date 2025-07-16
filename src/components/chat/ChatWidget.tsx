@@ -98,12 +98,12 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   if (!isOpen && !isClosing) return null;
   return <Card className={`fixed bottom-20 right-4 w-80 h-96 shadow-lg border-border bg-card z-50 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-sm">
+        <div className="flex items-center justify-between mx-0 px-0 py-0">
+          <CardTitle className="flex items-center gap-2 text-lg">
             <MessageCircle className="h-4 w-4 text-primary" />
             Smarty
           </CardTitle>
-          <Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0 hover:bg-muted">
+          <Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0 hover:bg-muted text-lg">
             <X className="h-4 w-4" />
           </Button>
         </div>
