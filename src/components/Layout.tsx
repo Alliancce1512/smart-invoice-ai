@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Navigation from "./Navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { FileText } from "lucide-react";
+import { ChatManager } from "./chat/ChatManager";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -46,6 +47,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           © {new Date().getFullYear()} SmartInvoice AI. All rights reserved.
         </div>
       </footer>
+      
+      <ChatManager />
     </div>
   );
 };
