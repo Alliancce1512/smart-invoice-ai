@@ -24,7 +24,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
 }) => {
   const [messages, setMessages] = useState<Message[]>([{
     id: "welcome",
-    content: "Hi! I'm Smarty, your AI assistant. How can I help you with SmartInvoice today?",
+    content: "Hi! I'm Smarty, your AI assistant. How can I help you today?",
     sender: "bot",
     timestamp: new Date()
   }]);
