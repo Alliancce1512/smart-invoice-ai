@@ -17,9 +17,10 @@ interface Message {
 interface ChatWidgetProps {
   isOpen: boolean;
   onClose: () => void;
+  isClosing: boolean;
 }
 
-export const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onClose }) => {
+export const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onClose, isClosing }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -103,10 +104,12 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen && !isClosing) return null;
 
   return (
-    <Card className="fixed bottom-4 right-4 w-80 h-96 shadow-lg border-border bg-card animate-scale-in z-50">
+    <Card className={`fixed bottom-20 right-4 w-80 h-96 shadow-lg border-border bg-card z-50 ${
+      isClosing ? 'animate-scale-out' : 'animate-scale-in'
+    }`}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-sm">

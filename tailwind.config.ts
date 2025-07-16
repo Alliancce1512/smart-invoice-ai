@@ -138,6 +138,16 @@ export default {
 						opacity: "1"
 					}
 				},
+				'scale-out': {
+					"0%": {
+						transform: "scale(1)",
+						opacity: "1"
+					},
+					"100%": {
+						transform: "scale(0.95)",
+						opacity: "0"
+					}
+				},
 				'gradient-x': {
 					'0%, 100%': { 
 						backgroundPosition: '0% 50%' 
@@ -153,6 +163,7 @@ export default {
 				'fade-in': 'fade-in 0.3s ease-out',
 				'fade-out': 'fade-out 0.3s ease-out',
 				'scale-in': 'scale-in 0.2s ease-out',
+				'scale-out': 'scale-out 0.2s ease-out',
 				'gradient-x': 'gradient-x 8s ease infinite'
 			}
 		}
