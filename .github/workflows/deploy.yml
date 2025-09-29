@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '24'  # избери версията на Node.js, която използваш
+          node-version: '16'  # избери версията на Node.js, която използваш
 
       - name: Install dependencies
         run: npm install
